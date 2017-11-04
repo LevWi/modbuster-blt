@@ -21,10 +21,6 @@ import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
 
-    public void ttt ( ArrayList<? extends Number> num){
-
-    }
-
     BluetoothSPPService mService;
 
     // Обратный вызов Сервиса
