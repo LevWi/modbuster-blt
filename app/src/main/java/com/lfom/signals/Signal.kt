@@ -1,23 +1,30 @@
 package com.lfom.signals
 
+
 /**
  * Created by gener on 04.11.2017.
  */
 
-interface ISignalIO<in I,out O> {
-    fun onInputData(data : I?)
-    fun outputData() : O?
+
+
+interface RefreshSignalListener{
+    fun update()
 }
 
-abstract class Converter<in I, out O>(val id: Int) : ISignalIO<I, O> {
+
+enum class SignalType{
+    BOOL,
+    SHORT,
+    INT ,
+    FLOAT,
+    BYTE_ARR,
+}
+
+abstract class Signal(val idx: Int, val mType: SignalType) : ISignalIO
+
+class SignalInt(idx : Int) : Signal(idx, SignalType.INT) {
 
 }
 
-class ConverterByteToString(id : Int) : Converter<Byte, Int>(id){
 
-}
 
-class Signal<T>(val id: Int) : ISignalIO<T,T> {
-    var value: T? = null
-
-}

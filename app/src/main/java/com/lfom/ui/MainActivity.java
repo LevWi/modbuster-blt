@@ -53,6 +53,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
+        Integer
         // Bind to LocalService
         Intent intent = new Intent(this, BluetoothSPPService.class);
 
