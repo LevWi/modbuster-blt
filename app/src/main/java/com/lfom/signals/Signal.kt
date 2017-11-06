@@ -33,12 +33,6 @@ interface IDataConversions {
     fun setFromString(value: String?)
 }
 
-enum class Quality(val code : Int){
-    ND(0), // нет данных
-    GOOD(1),
-    BAD(-1)
-}
-
 enum class SignalType {
     BOOL,
     BYTE,
@@ -48,9 +42,20 @@ enum class SignalType {
     BYTE_ARR,
     STRING
 }
+// todo Убрать или оставить?
+enum class Quality(val code : Int) {
+    ND(2), // нет данных
+    GOOD(0),
+    BAD(1)
+}
 
-
-abstract class Signal(val idx: Int, val mType: SignalType) : IDataConversions, RefreshSignalListener
+abstract class Signal(val idx: Int, val mType: SignalType) : IDataConversions, RefreshSignalListener {
+    // todo Убрать или оставить?
+    companion object {
+        const val BAD_QUALITY_CODE: Int = 1
+        const val GOOD_QUALITY_CODE: Int = 0
+    }
+}
 
 class SignalInt(idx: Int) : Signal(idx, SignalType.INT)
 
