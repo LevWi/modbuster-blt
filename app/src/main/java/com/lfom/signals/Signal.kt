@@ -24,13 +24,13 @@ interface IDataConversions {
     /*TODO реализовывать методы c аргументами переменной длины Vararg ?
     * Наверно все же все по простому
     * */
-    fun setFromBool(value: Boolean?)
-    fun setFromByte(value: Byte?)
-    fun setFromShort(value: Short?)
-    fun setFromInt(value: Int?)
-    fun setFromFloat(value: Float?)
-    fun setFromByteArray(value: ByteArray?)
-    fun setFromString(value: String?)
+    fun setData(value: Boolean?)
+    fun setData(value: Byte?)
+    fun setData(value: Short?)
+    fun setData(value: Int?)
+    fun setData(value: Float?)
+    fun setData(value: ByteArray?)
+    fun setData(value: String?)
 }
 
 enum class SignalType {
@@ -55,7 +55,11 @@ abstract class Signal(val idx: Int, val mType: SignalType) : IDataConversions, R
         const val BAD_QUALITY_CODE: Int = 1
         const val GOOD_QUALITY_CODE: Int = 0
     }
+
+    var name : String = ""
+
 }
+
 
 class SignalInt(idx: Int) : Signal(idx, SignalType.INT)
 
