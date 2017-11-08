@@ -6,24 +6,23 @@ package com.lfom.signals
  */
 
 
-interface RefreshSignalListener {
-    fun update(obj : IDataConversions)
-}
-
-interface IDataConversions {
-    var quality : Quality
+interface IDataOut {
+    var quality: Quality
 
     fun getBool(): Boolean?
-    fun getByte() : Byte?
+    fun getByte(): Byte?
     fun getShort(): Short?
     fun getInt(): Int?
     fun getFloat(): Float?
     fun getByteArray(): ByteArray?
-    fun getString() : String?
+    fun getString(): String?
+    fun getStringPerformance(): String {
+        return "${getString()}"
+    }
+}
 
-    /*TODO реализовывать методы c аргументами переменной длины Vararg ?
-    * Наверно все же все по простому
-    * */
+/*
+interface IDataIn {
     fun setData(value: Boolean?)
     fun setData(value: Byte?)
     fun setData(value: Short?)
@@ -31,6 +30,10 @@ interface IDataConversions {
     fun setData(value: Float?)
     fun setData(value: ByteArray?)
     fun setData(value: String?)
+}*/
+
+interface IDataIn {
+    fun setData(newVal: Any?)
 }
 
 enum class SignalType {
@@ -42,25 +45,114 @@ enum class SignalType {
     BYTE_ARR,
     STRING
 }
-// todo Убрать или оставить?
-enum class Quality(val code : Int) {
+
+enum class Quality(val code: Int) {
+    BAD_ARGUMENT(3),
     ND(2), // нет данных
     GOOD(0),
     BAD(1)
 }
 
-abstract class Signal(val idx: Int, val mType: SignalType) : IDataConversions, RefreshSignalListener {
-    // todo Убрать или оставить?
-    companion object {
-        const val BAD_QUALITY_CODE: Int = 1
-        const val GOOD_QUALITY_CODE: Int = 0
-    }
+// TODO Сделать канал на чтение и на запись ?
+abstract class Signal(val idx: Int, val mType: SignalType) : IDataOut, IDataIn, RefreshSignalListener {
 
-    var name : String = ""
+    override var quality: Quality = Quality.ND
+
+    val event = RefreshSignalEventManager()
+
+    var name: String = ""
 
 }
 
+class SignalInt(idx: Int) : Signal(idx, SignalType.INT) {
+    companion object {
+        const val BYTE_SIZE = java.lang.Integer.SIZE / java.lang.Byte.SIZE
+    }
 
-class SignalInt(idx: Int) : Signal(idx, SignalType.INT)
+    var value: Int? = null
 
+    override fun update(obj: IDataOut) {
+        value = obj.getInt()
+        quality = obj.quality
 
+        event.notifyListners(this)
+    }
+
+    override fun setData(newVal: Any?) {
+        value = when (newVal) {
+            null -> {
+                quality = Quality.BAD
+                null
+            }
+            is Boolean -> {
+                quality = Quality.GOOD
+                if (newVal) 1 else 0
+            }
+            is Byte -> {
+                quality = Quality.GOOD
+                newVal.toInt()
+            }
+            is Short -> {
+                quality = Quality.GOOD
+                newVal.toInt()
+            }
+            is Int -> {
+                quality = Quality.GOOD
+                newVal
+            }
+            is Float -> {
+                quality = Quality.GOOD
+                newVal.toInt()
+            }
+            is ByteArray -> {
+                try {
+                    java.nio.ByteBuffer.wrap(newVal).int
+                } catch (e: java.nio.BufferUnderflowException) {
+                    quality = Quality.BAD_ARGUMENT
+                    null
+                }
+            }
+            is String -> {
+                try {
+                    newVal.toInt()
+                } catch (e: NumberFormatException) {
+                    quality = Quality.BAD_ARGUMENT
+                    null
+                }
+            }
+            else -> {
+                quality = Quality.BAD_ARGUMENT; null
+            }
+        }
+    }
+
+    override fun getBool(): Boolean? {
+        return value ?: value != 0
+    }
+
+    override fun getByte(): Byte? {
+        return value?.toByte()
+    }
+
+    override fun getShort(): Short? {
+        return value?.toShort()
+    }
+
+    override fun getInt(): Int? {
+        return value
+    }
+
+    override fun getFloat(): Float? {
+        return value?.toFloat()
+    }
+
+    override fun getByteArray(): ByteArray? {
+        return java.nio.ByteBuffer
+                .allocate(BYTE_SIZE)
+                .putInt(value ?: return null).array()
+    }
+
+    override fun getString(): String? {
+        return value?.toString()
+    }
+}

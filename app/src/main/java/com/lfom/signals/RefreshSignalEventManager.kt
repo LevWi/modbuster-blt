@@ -4,20 +4,24 @@ package com.lfom.signals
  * Created by gener on 05.11.2017.
  */
 
-/*TODO Унаследовать его сигналом.
-* Сигнал должен реализовать
- * методы приведения
- * соответствующий метод будет вызываться соответствующим классом*/
-abstract class RefreshSignalEventManager {
 
-    var listeners: Map<String, List<EventListener>> = HashMap()
+class RefreshSignalEventManager {
 
-    fun subscribe(String eventType, EventListener listener) {
+    private val listeners = arrayListOf<RefreshSignalListener>()
+
+    fun subscribe(listener: RefreshSignalListener) {
+        listeners.firstOrNull({ it == listener }) ?: listeners.add(listener)
     }
 
-    fun   unsubscribe(String eventType, EventListener listener) {
+    fun unsubscribe(listener: RefreshSignalListener) {
+        listeners.remove(listener)
     }
 
-    fun   notify
+    fun notifyListners(obj: IDataOut) {
+        listeners.forEach { it.update(obj) }
+    }
+}
 
+interface RefreshSignalListener {
+    fun update(obj: IDataOut)
 }
