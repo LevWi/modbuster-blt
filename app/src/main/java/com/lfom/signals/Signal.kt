@@ -58,16 +58,23 @@ abstract class Signal(val idx: Int, val mType: SignalType) : IDataOut, IDataIn, 
 
     override var quality: Quality = Quality.ND
 
+    abstract val byteMixer: BytesMixer?
+
     val event = RefreshSignalEventManager()
 
     var name: String = ""
 
 }
 
-class SignalInt(idx: Int) : Signal(idx, SignalType.INT) {
+
+class SignalInt(idx: Int,
+                override val byteMixer: BytesMixer? = null) : Signal(idx, SignalType.INT) {
     companion object {
         const val BYTE_SIZE = java.lang.Integer.SIZE / java.lang.Byte.SIZE
     }
+
+    constructor(idx: Int, byteMixerTemplate: IntArray) :
+            this(idx, BytesMixer(byteMixerTemplate))
 
     var value: Int? = null
 
@@ -106,7 +113,11 @@ class SignalInt(idx: Int) : Signal(idx, SignalType.INT) {
             }
             is ByteArray -> {
                 try {
-                    java.nio.ByteBuffer.wrap(newVal).int
+                    quality = Quality.GOOD
+                    val buff: ByteArray? = if (byteMixer != null) byteMixer.mixBytes(newVal) else newVal
+                    java.nio.ByteBuffer
+                            .wrap( buff )
+                            .int
                 } catch (e: java.nio.BufferUnderflowException) {
                     quality = Quality.BAD_ARGUMENT
                     null
@@ -124,6 +135,7 @@ class SignalInt(idx: Int) : Signal(idx, SignalType.INT) {
                 quality = Quality.BAD_ARGUMENT; null
             }
         }
+        event.notifyListners(this)
     }
 
     override fun getBool(): Boolean? {
