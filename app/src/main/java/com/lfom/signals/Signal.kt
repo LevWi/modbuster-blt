@@ -73,9 +73,6 @@ class SignalInt(idx: Int,
         const val BYTE_SIZE = java.lang.Integer.SIZE / java.lang.Byte.SIZE
     }
 
-    constructor(idx: Int, byteMixerTemplate: IntArray) :
-            this(idx, BytesMixer(byteMixerTemplate))
-
     var value: Int? = null
 
     override fun update(obj: IDataOut) {
