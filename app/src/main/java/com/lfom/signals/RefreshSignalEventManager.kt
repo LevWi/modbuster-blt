@@ -17,7 +17,7 @@ class RefreshSignalEventManager {
         listeners.remove(listener)
     }
 
-    fun notifyListners(obj: IDataOut) {
+    fun notifyListeners(obj: IDataOut) {
         listeners.forEach { it.update(obj) }
     }
 }

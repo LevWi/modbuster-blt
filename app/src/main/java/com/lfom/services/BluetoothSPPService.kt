@@ -1,4 +1,4 @@
-package com.lfom.signals.services
+package com.lfom.services
 
 import android.app.Service
 import android.content.Intent

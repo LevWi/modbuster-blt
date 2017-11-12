@@ -14,10 +14,8 @@ import android.view.View;
 import android.widget.TextView;
 
 import com.lfom.modbuster.R;
-import com.lfom.signals.services.BluetoothSPPService;
-import com.lfom.signals.services.ISigServCallBack;
-
-import java.util.ArrayList;
+import com.lfom.services.BluetoothSPPService;
+import com.lfom.services.ISigServCallBack;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -53,7 +51,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        Integer
         // Bind to LocalService
         Intent intent = new Intent(this, BluetoothSPPService.class);
 

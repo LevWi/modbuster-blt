@@ -21,7 +21,7 @@
         </activity>
 
         <service
-            android:name="com.lfom.signals.services.BluetoothSPPService"
+            android:name="com.lfom.services.BluetoothSPPService"
             android:enabled="true" />
     </application>
 

@@ -1,4 +1,4 @@
-package com.lfom.signals.services;
+package com.lfom.services;
 
 /**
  * Created by gener on 01.11.2017.
