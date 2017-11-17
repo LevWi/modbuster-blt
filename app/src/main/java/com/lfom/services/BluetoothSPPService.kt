@@ -56,6 +56,8 @@ class BluetoothSPPService : Service() {
     override fun onBind(intent: Intent): IBinder? {
         return mBinder
     }
-
+    fun test(){
+        com.invertor.modbus.ModbusMasterFactory.createModbusMasterASCII()
+    }
 }
 
