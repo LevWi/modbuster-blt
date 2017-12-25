@@ -31,13 +31,18 @@ dependencies {
     androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
-    compile 'com.android.support:appcompat-v7:26.+'
-    compile 'com.android.support.constraint:constraint-layout:1.0.2'
-    testCompile 'junit:junit:4.12'
-    compile "org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlin_version"
+    implementation 'com.android.support:appcompat-v7:26.+'
+    implementation 'com.android.support.constraint:constraint-layout:1.0.2'
 
-    compile 'com.github.kochedykov:jlibmodbus:1.2.8.4'
+    //testCompile 'junit:junit:4.12'
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlin_version"
+
+    implementation 'com.intelligt.modbus:jlibmodbus:1.2.9.1'
+    //compile 'com.github.kochedykov:jlibmodbus:1.2.8.4' Старые версии пакета jlibmodbus
     //implementation project(':jlibmodbus-1.2.8.4')
+
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+    implementation 'com.google.android.gms:play-services-vision:11.0.4'
 }
 
 repositories {

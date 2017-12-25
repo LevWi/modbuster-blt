@@ -13,13 +13,19 @@ import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
+import com.google.android.gms.vision.CameraSource;
 import com.lfom.modbuster.R;
 import com.lfom.services.BluetoothSPPService;
 import com.lfom.services.ISigServCallBack;
 
+
+
+
 public class MainActivity extends AppCompatActivity {
 
     BluetoothSPPService mService;
+
+
 
     // Обратный вызов Сервиса
     ISigServCallBack mISigServCallBack = new ISigServCallBack() {

@@ -50,14 +50,12 @@ class BluetoothSPPService : Service() {
 
     fun setCallback(iSigServCallBack: ISigServCallBack) {
         mISigServCallBack = iSigServCallBack
-        TestTask()
+        TestTask() ;
     }
 
     override fun onBind(intent: Intent): IBinder? {
         return mBinder
     }
-    fun test(){
-        com.invertor.modbus.ModbusMasterFactory.createModbusMasterASCII()
-    }
+
 }
 
