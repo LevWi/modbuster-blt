@@ -100,6 +100,11 @@ public class MainActivity extends AppCompatActivity {
         startActivityForResult(intent, RC_BARCODE_CAPTURE);
     }
 
+    public void onFindFile(View view) {
+        Intent intent = new Intent(this, ConfigFileFinder.class);
+        startActivity(intent);
+    }
+
     /**
      * Called when an activity you launched exits, giving you the requestCode
      * you started it with, the resultCode it returned, and any additional

@@ -3,8 +3,8 @@
     package="com.lfom.modbuster">
 
     <uses-feature android:name="android.hardware.camera" />
-    <uses-permission android:name="android.permission.CAMERA" />
 
+    <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
     <uses-permission android:name="android.permission.BLUETOOTH" />
 
@@ -22,9 +22,9 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
-        <activity android:name="com.lfom.ui.barcode.BarcodeCaptureActivity"
-            android:label="Read Barcode"/>
+        <activity
+            android:name="com.lfom.ui.barcode.BarcodeCaptureActivity"
+            android:label="Read Barcode" />
 
         <meta-data
             android:name="com.google.android.gms.version"
@@ -36,6 +36,8 @@
         <service
             android:name="com.lfom.services.BluetoothSPPService"
             android:enabled="true" />
+
+        <activity android:name="com.lfom.ui.ConfigFileFinder"></activity>
     </application>
 
 </manifest>
