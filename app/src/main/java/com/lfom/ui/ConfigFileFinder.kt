@@ -1,13 +1,13 @@
 package com.lfom.ui
 
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import android.view.View
 import com.lfom.modbuster.R
-import java.io.File
 
 
 class ConfigFileFinder : AppCompatActivity() {
@@ -31,14 +31,19 @@ class ConfigFileFinder : AppCompatActivity() {
 
     public override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if (requestCode == FIND_FILE && resultCode == Activity.RESULT_OK) {
-            Log.w(TAG, data?.data?.path )
-            val inpFile = File(data?.data?.path ?: return)
-
-            if (!inpFile.canRead()) {
-                Log.e(TAG, "Can't read file ${inpFile.absolutePath}")
+            if (data == null) {
+                Log.w(TAG, "Empty Intent for file copy")
+                return
             }
             try {
-                val newFile = inpFile.copyTo(File(filesDir.path, inpFile.name), false)
+                val inpFileStream = baseContext.contentResolver.openInputStream(data.data)
+                val outFileStream = openFileOutput("default.prj", Context.MODE_PRIVATE)
+
+                inpFileStream.use { input ->
+                    outFileStream.use { output ->
+                        input.copyTo(output)
+                    }
+                }
             } catch (e: Exception) {
                 Log.e(TAG, e.toString())
             }
@@ -46,17 +51,4 @@ class ConfigFileFinder : AppCompatActivity() {
             super.onActivityResult(requestCode, resultCode, data)
         }
     }
-/*
-    @Throws(IOException::class)
-    fun copyFile(src: File, dst: File) {
-        src.copyTo()
-        val inChannel = FileInputStream(src).channel
-        val outChannel = FileOutputStream(dst).channel
-        try {
-            inChannel?.transferTo(0, inChannel.size(), outChannel)
-        } finally {
-            inChannel?.close()
-            outChannel?.close()
-        }
-    }*/
 }
