@@ -54,6 +54,14 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
+
+        Log.v(TAG, "Verbose test message");
+        Log.d(TAG, "Debug test message");
+        Log.i(TAG, "Info test message");
+        Log.e(TAG, "Error test message");
+        Log.w(TAG, "Waring test message");
+        Log.wtf(TAG, "WTF test message");
+        Log.i(TAG, String.format("Debug level is loggable: %s", Log.isLoggable(TAG, Log.DEBUG)));
         // Bind to LocalService
         //Intent intent = new Intent(this, BluetoothSPPService.class);
 

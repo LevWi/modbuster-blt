@@ -60,6 +60,8 @@ abstract class Signal(val idx: Int, val mType: SignalType) :
 }
 
 
+
+
 class SignalFloat(idx: Int,
                   override val byteMixer: BytesMixer? = null) : Signal(idx, SignalType.FLOAT) {
     companion object {

@@ -10,17 +10,17 @@ import android.view.View
 import com.lfom.modbuster.R
 
 
+const val FIND_FILE: Int = 0xA
+const val TAG = "ConfigFileFinder"
+
 class ConfigFileFinder : AppCompatActivity() {
 
-    private val TAG = this.javaClass.simpleName
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_config_file_finder)
     }
-
-    private val FIND_FILE: Int = 0xA
-
 
     public fun onFindFile(view: View) {
         val intent = Intent(Intent.ACTION_GET_CONTENT)
