@@ -44,6 +44,12 @@ enum class Quality(val code: Int) {
 }
 
 // TODO Сделать канал на чтение и на запись ?
+Для этого добавить:
+- Событие/канал приема сообщениий Arrived event от внешнего сервера
++ сделать пустой преобразователь сигнала
++ Для публикации сделать некий объект "команда" или "значение" . Объект обвертка
++ Интерфейс "Конвертируемый"
+
 abstract class Signal(val idx: Int, val mType: SignalType) :
         IDataOut,
         IDataIn,
@@ -53,7 +59,10 @@ abstract class Signal(val idx: Int, val mType: SignalType) :
 
     abstract val byteMixer: BytesMixer?
 
-    val event = RefreshSignalEventManager()
+    //val event = RefreshSignalEventManager()
+
+    val publishEvent
+    val arrivedEvent
 
     var name: String = ""
 

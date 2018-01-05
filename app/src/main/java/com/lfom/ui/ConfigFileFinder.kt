@@ -15,21 +15,19 @@ const val TAG = "ConfigFileFinder"
 
 class ConfigFileFinder : AppCompatActivity() {
 
-
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_config_file_finder)
     }
 
-    public fun onFindFile(view: View) {
+    fun onFindFile(view: View) {
         val intent = Intent(Intent.ACTION_GET_CONTENT)
         intent.type = "*/*"
         intent.addCategory(Intent.CATEGORY_OPENABLE)
         startActivityForResult(intent, FIND_FILE)
     }
 
-    public override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if (requestCode == FIND_FILE && resultCode == Activity.RESULT_OK) {
             if (data == null) {
                 Log.w(TAG, "Empty Intent for file copy")

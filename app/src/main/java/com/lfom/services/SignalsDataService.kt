@@ -6,7 +6,8 @@ import android.app.Service
 import android.content.Intent
 import android.os.Binder
 import android.os.IBinder
-import java.lang.reflect.Array
+import org.eclipse.paho.android.service.MqttAndroidClient
+
 
 import java.util.concurrent.ConcurrentHashMap
 
@@ -27,11 +28,16 @@ class SignalsDataService : Service() {
     обновление соотвествующего сообщения
 
     + проверка на уникальность Id сигнала
+
+     TODO
+     Если новое значение сигнала приходит от сервера
+     - стандартное действие  , уведомляем подписанных приемников
+     Пишем значение сами
+     - другое действие, уведомляем подписанных приемников
      */
 
     var mSignals : Map<Int, Signal> = ConcurrentHashMap()
         private set
-
 
 
     inner class SigDataServiceBinder : Binder() {
@@ -44,3 +50,12 @@ class SignalsDataService : Service() {
     }
 }
 
+class MqttServer(val mqttAndroidClient : MqttAndroidClient){
+      var m
+}
+
+data class MqttSignalEntry(val topicSubscribe : String ,
+                           val topicPublish : String = "",
+                           val idSignal : Int,
+                           var failBinding : Boolean,
+                           var signal : Signal? = null)

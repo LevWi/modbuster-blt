@@ -2,6 +2,7 @@ apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 
+
 android {
     compileSdkVersion 26
     buildToolsVersion "26.0.2"
@@ -38,6 +39,7 @@ dependencies {
     //testCompile 'junit:junit:4.12'
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlin_version"
 
+
     //implementation 'com.intelligt.modbus:jlibmodbus:1.2.9.1'
     //compile 'com.github.kochedykov:jlibmodbus:1.2.8.4' Старые версии пакета jlibmodbus
     //implementation project(':jlibmodbus-1.2.8.4')
@@ -54,7 +56,4 @@ repositories {
     maven {
         url "https://repo.eclipse.org/content/repositories/paho-snapshots/"
     }
-
 }
-
-apply plugin: 'kotlin-android-extensions'
