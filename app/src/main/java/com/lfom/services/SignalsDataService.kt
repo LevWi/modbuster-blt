@@ -58,4 +58,10 @@ data class MqttSignalEntry(val topicSubscribe : String ,
                            val topicPublish : String = "",
                            val idSignal : Int,
                            var failBinding : Boolean,
-                           var signal : Signal? = null)
+                           var signal : Signal? = null) {
+
+}
+
+fun MqttSignalEntry.send(){
+    this.idSignal
+}

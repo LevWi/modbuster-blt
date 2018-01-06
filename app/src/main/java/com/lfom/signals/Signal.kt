@@ -22,33 +22,16 @@ interface IDataOut {
 }
 
 
-interface IDataIn {
-    fun setData(newVal: Any?)
-}
 
-enum class SignalType {
-    BOOL,
-    BYTE,
-    SHORT,
-    INT,
-    FLOAT,
-    BYTE_ARR,
-    STRING
-}
 
-enum class Quality(val code: Int) {
-    BAD_ARGUMENT(3),
-    ND(2), // нет данных
-    GOOD(0),
-    BAD(1)
-}
+
 
 // TODO Сделать канал на чтение и на запись ?
-Для этого добавить:
+/*Для этого добавить:
 - Событие/канал приема сообщениий Arrived event от внешнего сервера
 + сделать пустой преобразователь сигнала
 + Для публикации сделать некий объект "команда" или "значение" . Объект обвертка
-+ Интерфейс "Конвертируемый"
++ Интерфейс "Конвертируемый"*/
 
 abstract class Signal(val idx: Int, val mType: SignalType) :
         IDataOut,
