@@ -36,7 +36,7 @@ class SignalsDataService : Service() {
      - другое действие, уведомляем подписанных приемников
      */
 
-    var mSignals : Map<Int, Signal> = ConcurrentHashMap()
+    var mSignals: Map<Int, Signal> = ConcurrentHashMap()
         private set
 
 
@@ -50,18 +50,18 @@ class SignalsDataService : Service() {
     }
 }
 
-class MqttServer(val mqttAndroidClient : MqttAndroidClient){
-      var m
+class MqttServer(val mqttAndroidClient: MqttAndroidClient) {
+    var m
 }
 
-data class MqttSignalEntry(val topicSubscribe : String ,
-                           val topicPublish : String = "",
-                           val idSignal : Int,
-                           var failBinding : Boolean,
-                           var signal : Signal? = null) {
+data class MqttSignalEntry(val topicSubscribe: String,
+                           val topicPublish: String = "",
+                           val idSignal: Int,
+                           var failBinding: Boolean = false,
+                           var signal: Signal? = null) {
 
 }
 
-fun MqttSignalEntry.send(){
+fun MqttSignalEntry.send() {
     this.idSignal
 }

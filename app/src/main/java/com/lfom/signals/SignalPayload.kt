@@ -22,7 +22,11 @@ enum class Quality(val code: Int) {
 
 sealed class SignalPayload : IConvertable
 object Empty : SignalPayload()
-data class BadData(val message: String = "BAD") : SignalPayload()
+data class BadData(var message: String = "BAD") : SignalPayload() {
+    override val stringPresentation: String?
+        get() = message
+}
+
 data class payloadString(var payload: String) : SignalPayload()
 data class payloadInt(var payload: Int) : SignalPayload()
 data class payloadFloat(var payload: Float) : SignalPayload()
@@ -48,12 +52,16 @@ class SignalChannel(val idx: Int, val type: SignalType, val name: String = "") :
     }
 }
 
-interface IConvertable{
-    val boolPresentation : Boolean?
-        get() = null
-    val intPresentation : Int?
-    val floatPresentation : Float?
-    val stringPresentation : String?
+// TODO Как же реализовать ??
+class ConverterPayload{
+
+}
+
+interface IConvertable {
+    fun getBool(option: convertOption? = null): Boolean?
+    fun getInt(option: convertOption? = null): Int?
+    fun getFloat(option: convertOption? = null): Float?
+    fun getString(option: convertOption? = null): String?
 }
 
 /**
