@@ -9,7 +9,6 @@ import android.util.Log
 import android.view.View
 import com.lfom.modbuster.R
 
-
 const val FIND_FILE: Int = 0xA
 const val TAG = "ConfigFileFinder"
 
