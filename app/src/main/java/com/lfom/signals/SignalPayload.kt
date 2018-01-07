@@ -20,8 +20,7 @@ enum class Quality(val code: Int) {
     BAD(1)
 }
 
-sealed class SignalPayload
-
+sealed class SignalPayload : IConvertable
 object Empty : SignalPayload()
 data class BadData(val message: String = "BAD") : SignalPayload()
 data class payloadString(var payload: String) : SignalPayload()
@@ -34,31 +33,39 @@ class SignalChannel(val idx: Int, val type: SignalType, val name: String = "") :
     var payload: SignalPayload = Empty
     var changeDataWhenPublish = false
     var publishListener: IPublishing? = null
-    var publishCallback: ((data: SignalPayload?, signal: SignalChannel? ) -> Unit)? = null
+    var publishCallback: ((data: SignalPayload?, signal: SignalChannel?) -> Unit)? = null
 
-    override fun publish(data: SignalPayload, signal: SignalChannel) {
+    override fun publish(data: SignalPayload, signal: SignalChannel?) {
         //publishCallback?.invoke(data, signal) TODO Нужен ли вообще ? Конвертер?
-         if (changeDataWhenPublish) {
-             TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-         }
-         publishListener?.publish(data, this)
+        if (changeDataWhenPublish) {
+            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        }
+        publishListener?.publish(data, this)
     }
 
-    override fun onNewPayload(data: SignalPayload, signal: SignalChannel) {
+    override fun onNewPayload(data: SignalPayload, signal: SignalChannel?) {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
+}
+
+interface IConvertable{
+    val boolPresentation : Boolean?
+        get() = null
+    val intPresentation : Int?
+    val floatPresentation : Float?
+    val stringPresentation : String?
 }
 
 /**
  * Для отправки значения на сервер
  */
 interface IPublishing {
-    fun publish(data: SignalPayload, signal : SignalChannel)
+    fun publish(data: SignalPayload, signal: SignalChannel?)
 }
 
 /**
  * Прием данных извне
  */
 interface IArriving {
-    fun onNewPayload(data: SignalPayload, signal : SignalChannel)
+    fun onNewPayload(data: SignalPayload, signal: SignalChannel?)
 }
