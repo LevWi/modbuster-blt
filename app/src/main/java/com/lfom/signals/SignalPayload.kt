@@ -13,102 +13,134 @@ enum class SignalType {
     STRING
 }
 
-enum class Quality(val code: Int) {
-    BAD_ARGUMENT(3),
-    ND(2), // нет данных
-    GOOD(0),
-    BAD(1)
-}
-
-sealed class SignalPayload
-object Empty : SignalPayload()
-data class BadData(val message: String = "BAD") : SignalPayload() {
-    override fun toString(): String {
-        return message
-    }
-}
-
-data class payloadString(private var payload: String) : SignalPayload(), IConvertible
-data class payloadInt(private var payload: Int) : SignalPayload(), IConvertible
-data class payloadFloat(private var payload: Float) : SignalPayload(), IConvertible
-data class payloadBool(private var payload: Boolean) : SignalPayload(), IConvertible {
-
-    var highLevel = 1.0
-    var lowLevel = 0.0
-    var trueState: String = true.toString()
-    var falseState: String = false.toString()
-
-    override fun setPayload(data: IConvertible) {
-        payload = when (data) {
-            is payloadBool -> data.asBool
-            is payloadInt, is payloadFloat -> when {
-                data.asFloat >= highLevel -> true
-                data.asFloat <= lowLevel -> false
-                else -> return
+sealed class SignalPayload {
+    companion object {
+        /**
+         * Returns SignalPayload object which implement IConvertible
+         */
+        fun createInstance(type: SignalType): SignalPayload {
+            TODO("Нет реализации конкретных настроек подкласса")
+            return when (type) {
+                SignalType.BOOL -> payloadBool()
+                SignalType.INT -> payloadInt()
+                SignalType.FLOAT -> payloadFloat()
+                SignalType.STRING -> payloadString()
             }
-            is payloadString -> when (data.asString) {
-                trueState -> true
-                falseState -> false
-                else -> return
-            }
-            else -> data.asBool
         }
     }
 
-    override val asBool
-        get() = payload
-
-    override val asInt
-        get() = if (payload) highLevel.toInt() else lowLevel.toInt()
-
-    override val asFloat
-        get() = if (payload) highLevel.toFloat() else lowLevel.toFloat()
-
-    override val asString
-        get() = if (payload) trueState else falseState
-}
-
-
-class SignalChannel(val idx: Int, val type: SignalType, val name: String = "") : IPublishing, IArriving {
-    @Volatile var payload: SignalPayload = Empty // TODO Конкурентный ресурс
-    var changeDataWhenPublish = false
-
-    var publishCallback: ((data: SignalPayload?, signal: IPublishing?) -> Unit)? =  null
-
-    var publishListener: IPublishing? = null
-    val arrivingDataEventManager = ArrivingDataEventManager()
-
-    fun notifyListeners(data: SignalPayload){
-        arrivingDataEventManager.notifyListeners(data ,this)
-    }
-
-    override fun publish(data: SignalPayload, signal: IPublishing?) {
-        publishCallback?.invoke(data, signal)
-        if (changeDataWhenPublish) {
-            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    //    object Empty : SignalPayload()
+    data class BadData(val message: String = "BAD") : SignalPayload() {
+        override fun toString(): String {
+            return message
         }
-        publishListener?.publish(data, this)
     }
 
-    override fun onNewPayload(data: SignalPayload, sender: IArriving?) {
-        synchronized(this, )
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    data class payloadString(private var payload: String = "") : SignalPayload(), IConvertible
+    data class payloadInt(private var payload: Int = 0) : SignalPayload(), IConvertible
+    data class payloadFloat(private var payload: Float = 0F) : SignalPayload(), IConvertible
+    data class payloadBool(private var payload: Boolean = false) : SignalPayload(), IConvertible {
+
+        var highLevel = 1.0
+        var lowLevel = 0.0
+        var trueState: String = true.toString()
+        var falseState: String = false.toString()
+
+        override fun setFromPayload(data: IConvertible) {
+            payload = when (data) {
+                is payloadBool -> data.asBool
+                is payloadInt, is payloadFloat -> when {
+                    data.asFloat >= highLevel -> true
+                    data.asFloat <= lowLevel -> false
+                    else -> return
+                }
+                is payloadString -> when (data.asString) {
+                    trueState -> true
+                    falseState -> false
+                    else -> return
+                }
+                else -> data.asBool
+            }
+        }
+
+        override val asBool
+            get() = payload
+
+        override val asInt
+            get() = if (payload) highLevel.toInt() else lowLevel.toInt()
+
+        override val asFloat
+            get() = if (payload) highLevel.toFloat() else lowLevel.toFloat()
+
+        override val asString
+            get() = if (payload) trueState else falseState
+    }
+
+
+    class SignalChannel(val idx: Int, val type: SignalType) : IPublishing, IArriving {
+        var payload: SignalPayload? = null
+            private set
+        var name: String = ""
+
+        var refreshDataWhenPublish = false
+
+        var publishCallback: ((data: SignalPayload, sender: IPublishing?) -> Unit)? = null
+        var arrivedCallback: ((data: SignalPayload, sender: IArriving?) -> Unit)? = null
+
+        var publishListener: IPublishing? = null
+        val arrivingDataEventManager = ArrivingDataEventManager()
+
+        fun notifyListeners(data: SignalPayload) {
+            arrivingDataEventManager.notifyListeners(data, this)
+        }
+
+        override fun publish(data: SignalPayload, sender: IPublishing?) {
+            if (refreshDataWhenPublish) {
+                setInnerPayload(data)
+            }
+            publishCallback?.invoke(data, sender)
+            TODO("Нет обратного преобразования")
+            publishListener?.publish(data, this)
+        }
+
+        override fun onNewPayload(data: SignalPayload, sender: IArriving?) {
+            setInnerPayload(data)
+            arrivedCallback?.invoke(data, sender)
+            notifyListeners(payload ?: return)
+        }
+
+        fun setInnerPayload(data: SignalPayload) {
+            //if (data != null) {
+            synchronized(this) {
+                when (data) {
+                    is IConvertible -> {
+                        if (payload == null || payload is BadData) {
+                            payload = SignalPayload.createInstance(type)
+                        }
+                        (payload as IConvertible).setFromPayload(data)
+                    }
+                    is BadData -> this.payload = data.copy()
+                }
+            }
+            //}
+        }
     }
 }
+
 
 interface IConvertible {
     val asBool: Boolean
     val asInt: Int
     val asFloat: Float
     val asString: String
-    fun setPayload(data: IConvertible)
+    fun setFromPayload(data: IConvertible)
 }
 
 /**
  * Для отправки значения на сервер
  */
 interface IPublishing {
-    fun publish(data: SignalPayload, signal: IPublishing?)
+    fun publish(data: SignalPayload, sender: IPublishing?)
 }
 
 /**

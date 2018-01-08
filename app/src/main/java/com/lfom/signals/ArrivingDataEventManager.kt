@@ -6,17 +6,17 @@ package com.lfom.signals
 
 class ArrivingDataEventManager {
 
-    val listeners = arrayListOf<IArriving>()
+    private val mListeners = arrayListOf<IArriving>()
 
     fun subscribe(listener: IArriving) {
-        listeners.firstOrNull({ it == listener }) ?: listeners.add(listener)
+        mListeners.firstOrNull({ it == listener }) ?: mListeners.add(listener)
     }
 
     fun unsubscribe(listener: IArriving) {
-        listeners.remove(listener)
+        mListeners.remove(listener)
     }
 
     fun notifyListeners(data: SignalPayload, sender: IArriving?) {
-        listeners.forEach { it.onNewPayload(data, sender) }
+        mListeners.forEach { it.onNewPayload(data, sender) }
     }
 }
