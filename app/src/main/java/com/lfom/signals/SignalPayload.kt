@@ -64,7 +64,13 @@ sealed class SignalPayload {
     }
 }
 
+
+
+
 data class BadData(val message: String = "BAD") : SignalPayload()
+
+
+
 
 data class PayloadBool(private val boolOptions: BoolOptions, private var payload: Boolean = false) : SignalPayload(), IConvertible {
 
@@ -94,6 +100,8 @@ data class PayloadBool(private val boolOptions: BoolOptions, private var payload
 }
 
 
+
+
 data class PayloadInt(private val intOptions: IntOptions,
                       private var payload: Int = 0) : SignalPayload(), IConvertible {
     override fun asBool(options: ConvertOptions?): Boolean? {
@@ -118,6 +126,10 @@ data class PayloadInt(private val intOptions: IntOptions,
         return true
     }
 }
+
+
+
+
 
 data class PayloadFloat(private val floatOptions: FloatOptions,
                         private var payload: Float = 0F) : SignalPayload(), IConvertible {
@@ -144,7 +156,10 @@ data class PayloadFloat(private val floatOptions: FloatOptions,
     }
 }
 
-data class PayloadString(val stringOptions: StringOptions,
+
+
+
+data class PayloadString(private val stringOptions: StringOptions,
                          private var payload: String = "") : SignalPayload(), IConvertible {
     override fun asBool(options: ConvertOptions?): Boolean? {
         val opt = options ?: DefaultOptions
@@ -176,6 +191,8 @@ data class PayloadString(val stringOptions: StringOptions,
 
 }
 
+
+
 fun Number.toBool(options: ConvertOptions): Boolean? {
     val v = this.toDouble()
     return when {
@@ -184,6 +201,8 @@ fun Number.toBool(options: ConvertOptions): Boolean? {
         else -> null
     }
 }
+
+
 
 fun Boolean.toDouble(options: ConvertOptions): Double {
     return if (this) options.highLevel else options.lowLevel

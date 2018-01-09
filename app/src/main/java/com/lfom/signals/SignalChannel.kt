@@ -1,9 +1,5 @@
 package com.lfom.signals
 
-import kotlinx.coroutines.experimental.runBlocking
-import kotlinx.coroutines.experimental.sync.Mutex
-import kotlinx.coroutines.experimental.sync.withLock
-
 /**
  * Created by gener on 08.01.2018.
  */
@@ -19,7 +15,7 @@ class SignalChannel(val idx: Int, val options: ConvertOptions) : IPublishing, IA
     var publishListener: IPublishing? = null
 
     private val arrivingDataEventManager = ArrivingDataEventManager()
-    private val mutex = Mutex()
+//    private val mutex = Mutex()
 
     fun notifyListeners(data: SignalPayload) {
         arrivingDataEventManager.notifyListeners(data, this)
@@ -35,28 +31,27 @@ class SignalChannel(val idx: Int, val options: ConvertOptions) : IPublishing, IA
     }
 
     override fun onNewPayload(data: SignalPayload, sender: IArriving?) {
-        runBlocking {
-            mutex.withLock {
-                setInnerPayload(data)
-            }
-        }
+        //runBlocking {
+        //    mutex.withLock {
+        setInnerPayload(data)
+        //    }
+        //}
         arrivedCallback?.invoke(data, sender)
         notifyListeners(payload ?: return)
     }
 
     fun setInnerPayload(data: SignalPayload) {
-            when (data) {
-                is IConvertible -> {
-                    if (payload == null || payload is SignalPayload.BadData) {
-                        payload = SignalPayload.createInstance(options)
-                    }
-                    (payload as IConvertible).setFromPayload(data)
+        when (data) {
+            is IConvertible -> {
+                if (payload == null || payload is BadData) {
+                    payload = SignalPayload.createInstance(options)
                 }
-                is SignalPayload.BadData -> this.payload = data.copy()
+                (payload as IConvertible).setFromPayload(data)
             }
+            is BadData -> this.payload = data.copy()
         }
+    }
 }
-
 
 
 /**
