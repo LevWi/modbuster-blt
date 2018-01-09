@@ -1,9 +1,13 @@
 package com.lfom.signals
 
+import kotlinx.coroutines.experimental.runBlocking
+import kotlinx.coroutines.experimental.sync.Mutex
+import kotlinx.coroutines.experimental.sync.withLock
+
 /**
  * Created by gener on 08.01.2018.
  */
-class SignalChannel(val idx: Int, val type: SignalType ) : IPublishing, IArriving {
+class SignalChannel(val idx: Int, val options: ConvertOptions) : IPublishing, IArriving {
     var payload: SignalPayload? = null
         private set
     var name: String = ""
@@ -13,7 +17,9 @@ class SignalChannel(val idx: Int, val type: SignalType ) : IPublishing, IArrivin
     var arrivedCallback: ((data: SignalPayload, sender: IArriving?) -> Unit)? = null
 
     var publishListener: IPublishing? = null
-    val arrivingDataEventManager = ArrivingDataEventManager()
+
+    private val arrivingDataEventManager = ArrivingDataEventManager()
+    private val mutex = Mutex()
 
     fun notifyListeners(data: SignalPayload) {
         arrivingDataEventManager.notifyListeners(data, this)
@@ -29,37 +35,29 @@ class SignalChannel(val idx: Int, val type: SignalType ) : IPublishing, IArrivin
     }
 
     override fun onNewPayload(data: SignalPayload, sender: IArriving?) {
-        setInnerPayload(data)
+        runBlocking {
+            mutex.withLock {
+                setInnerPayload(data)
+            }
+        }
         arrivedCallback?.invoke(data, sender)
         notifyListeners(payload ?: return)
     }
 
     fun setInnerPayload(data: SignalPayload) {
-        //if (data != null) {
-        synchronized(this) {
             when (data) {
                 is IConvertible -> {
                     if (payload == null || payload is SignalPayload.BadData) {
-                        payload = SignalPayload.createInstance(type)
+                        payload = SignalPayload.createInstance(options)
                     }
                     (payload as IConvertible).setFromPayload(data)
                 }
                 is SignalPayload.BadData -> this.payload = data.copy()
             }
         }
-        //}
-    }
-}
 }
 
 
-interface IConvertible {
-    val asBool: Boolean
-    val asInt: Int
-    val asFloat: Float
-    val asString: String
-    fun setFromPayload(data: IConvertible)
-}
 
 /**
  * Для отправки значения на сервер
