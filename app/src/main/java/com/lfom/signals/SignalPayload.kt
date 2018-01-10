@@ -12,6 +12,9 @@ interface IConvertible {
     fun setFromPayload(data: IConvertible): Boolean
 }
 
+interface IPayloadCreator{
+    fun create() : SignalPayload
+}
 
 sealed class CreatorVariant(val writeble: Boolean = false) {
     var trueString: String = true.toString()
@@ -38,35 +41,26 @@ sealed class CreatorVariant(val writeble: Boolean = false) {
         set(value) {
             if (writeble) field = value
         }
-
-    /**
-     * Returns SignalPayload object corresponding subclass of CreatorVariant
-     */
-    abstract fun create() : SignalPayload?
 }
 
-object DefaultOptions : CreatorVariant(false){
-    override fun create(): SignalPayload? {
-        return null
-    }
-}
+object DefaultOptions : CreatorVariant(false)
 
-class BoolOptions : CreatorVariant(){
+class BoolOptions : CreatorVariant() , IPayloadCreator {
     override fun create(): SignalPayload {
         return BoolPayload(this)
     }
 }
-class IntOptions : CreatorVariant() {
+class IntOptions : CreatorVariant() , IPayloadCreator {
     override fun create(): SignalPayload {
         return IntPayload(this)
     }
 }
-class FloatOptions : CreatorVariant() {
+class FloatOptions : CreatorVariant() , IPayloadCreator {
     override fun create(): SignalPayload {
         return FloatPayload(this)
     }
 }
-class StringOptions : CreatorVariant(){
+class StringOptions : CreatorVariant() , IPayloadCreator{
     override fun create(): SignalPayload {
         return StringPayload(this)
     }
@@ -135,7 +129,6 @@ data class IntPayload(private val intOptions: IntOptions,
 
 
 
-
 data class FloatPayload(private val floatOptions: FloatOptions,
                         private var value: Float = 0F) : SignalPayload(), IConvertible {
     override fun asBool(options: CreatorVariant?): Boolean? {
@@ -160,7 +153,6 @@ data class FloatPayload(private val floatOptions: FloatOptions,
         return true
     }
 }
-
 
 
 

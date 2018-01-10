@@ -1,21 +1,24 @@
 package com.lfom.signals
 
+import java.time.LocalDateTime
+import java.util.*
+
 /**
  * Created by gener on 08.01.2018.
  */
-class SignalChannel(val idx: Int, val options: CreatorVariant) : IPublishing, IArriving {
+class SignalChannel(val idx: Int, val options: IPayloadCreator) : IPublishing, IArriving {
     var payload: SignalPayload? = null
         private set
     var name: String = ""
     var refreshDataWhenPublish = false
 
-    var publishCallback: ((data: SignalPayload, sender: IPublishing?) -> Unit)? = null
-    var arrivedCallback: ((data: SignalPayload, sender: IArriving?) -> Unit)? = null
+    var publishCallback: ((data: SignalPayload, sender: IPublishing?, receiver: SignalChannel?) -> Unit)? = null
+    var arrivedCallback: ((data: SignalPayload, sender: IArriving?, receiver: SignalChannel?) -> Unit)? = null
 
     var publishListener: IPublishing? = null
+    var refreshTimePoint = Date(0) // TODO Формат хранения записи ??
 
     private val arrivingDataEventManager = ArrivingDataEventManager()
-//    private val mutex = Mutex()
 
     fun notifyListeners(data: SignalPayload) {
         arrivingDataEventManager.notifyListeners(data, this)
@@ -25,9 +28,10 @@ class SignalChannel(val idx: Int, val options: CreatorVariant) : IPublishing, IA
         if (refreshDataWhenPublish) {
             setInnerPayload(data)
         }
-        publishCallback?.invoke(data, sender)
+        publishCallback?.invoke(data, sender, this)
         TODO("Нет обратного преобразования")
         publishListener?.publish(data, this)
+        LocalDateTime()
     }
 
     override fun onNewPayload(data: SignalPayload, sender: IArriving?) {
@@ -36,7 +40,7 @@ class SignalChannel(val idx: Int, val options: CreatorVariant) : IPublishing, IA
         setInnerPayload(data)
         //    }
         //}
-        arrivedCallback?.invoke(data, sender)
+        arrivedCallback?.invoke(data, sender, this)
         notifyListeners(payload ?: return)
     }
 
@@ -44,12 +48,13 @@ class SignalChannel(val idx: Int, val options: CreatorVariant) : IPublishing, IA
         when (data) {
             is IConvertible -> {
                 if (payload == null || payload is BadData) {
-                    payload = SignalPayload.createInstance(options)
+                    payload = options.create()
                 }
-                (payload as IConvertible).setFromPayload(data)
+                (payload as IConvertible).setFromPayload(data) // TODO Отработка ошибки конвертации
             }
             is BadData -> this.payload = data.copy()
         }
+        refreshTimePoint = Date()
     }
 }
 
