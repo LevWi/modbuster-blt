@@ -3,7 +3,7 @@ package com.lfom.signals
 /**
  * Created by gener on 08.01.2018.
  */
-class SignalChannel(val idx: Int, val options: ConvertOptions) : IPublishing, IArriving {
+class SignalChannel(val idx: Int, val options: CreatorVariant) : IPublishing, IArriving {
     var payload: SignalPayload? = null
         private set
     var name: String = ""
