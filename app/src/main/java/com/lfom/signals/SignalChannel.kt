@@ -1,7 +1,6 @@
 package com.lfom.signals
 
-import java.time.LocalDateTime
-import java.util.*
+
 
 /**
  * Created by gener on 08.01.2018.
@@ -25,13 +24,19 @@ class SignalChannel(val idx: Int, val options: IPayloadCreator) : IPublishing, I
     }
 
     override fun publish(data: SignalPayload, sender: IPublishing?) {
+        /* TODO
+
+            -- для обратного преобразования использовать настройки обратного канала
+            т.к. текущий канал не знает какие преобразование претерпели данные
+            -- без refreshDataWhenPublish не обновлять данные , а только преобразовывать на основе их копии
+         */
+        var payloadBuf = options.create()
         if (refreshDataWhenPublish) {
-            setInnerPayload(data)
+            InverseSetInnerPayload(data)  // TODO("Нужно обратное преобразование")
+            payload?.let { payloadBuf = it }
         }
         publishCallback?.invoke(data, sender, this)
-        TODO("Нет обратного преобразования")
         publishListener?.publish(data, this)
-        LocalDateTime()
     }
 
     override fun onNewPayload(data: SignalPayload, sender: IArriving?) {
