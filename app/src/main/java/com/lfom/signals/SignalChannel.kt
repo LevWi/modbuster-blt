@@ -26,7 +26,7 @@ class SignalChannel(val idx: Int, val options: IPayloadCreator) : IPublishing, I
     override fun publish(data: SignalPayload, sender: IPublishing?) {
         /* TODO
 
-            -- для обратного преобразования использовать настройки обратного канала
+            -- для обратного преобразования использовать настройки пришедшего data
             т.к. текущий канал не знает какие преобразование претерпели данные
             -- без refreshDataWhenPublish не обновлять данные , а только преобразовывать на основе их копии
          */
@@ -34,6 +34,7 @@ class SignalChannel(val idx: Int, val options: IPayloadCreator) : IPublishing, I
         if (refreshDataWhenPublish) {
             InverseSetInnerPayload(data)  // TODO("Нужно обратное преобразование")
             payload?.let { payloadBuf = it }
+
         }
         publishCallback?.invoke(data, sender, this)
         publishListener?.publish(data, this)

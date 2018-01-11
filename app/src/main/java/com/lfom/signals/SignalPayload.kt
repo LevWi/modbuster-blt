@@ -5,11 +5,11 @@ package com.lfom.signals
  */
 
 interface IConvertible {
-    fun asBool(options: CreatorVariant?): Boolean?
-    fun asInt(options: CreatorVariant?): Int?
-    fun asFloat(options: CreatorVariant?): Float?
-    fun asString(options: CreatorVariant?): String
-    fun setFromPayload(data: IConvertible): Boolean
+    fun asBool(options: CreatorVariant?, reverse : Boolean = false): Boolean?
+    fun asInt(options: CreatorVariant?, reverse : Boolean = false): Int?
+    fun asFloat(options: CreatorVariant?, reverse : Boolean = false): Float?
+    fun asString(options: CreatorVariant?, reverse : Boolean = false): String
+    fun setFromPayload(data: IConvertible, reverse : Boolean = false): Boolean
 }
 
 interface IPayloadCreator{
@@ -73,27 +73,30 @@ data class BadData(val message: String = "BAD") : SignalPayload()
 
 data class BoolPayload(private val boolOptions: BoolOptions, private var value: Boolean = false) : SignalPayload(), IConvertible {
 
-    override fun asBool(options: CreatorVariant?): Boolean? {
+    override fun asBool(options: CreatorVariant?, reverse : Boolean): Boolean? {
         return value
     }
 
-    override fun asInt(options: CreatorVariant?): Int? {
-        return value.toDouble(options ?: DefaultOptions).toInt()
+    override fun asInt(options: CreatorVariant?, reverse : Boolean): Int? {
+        val opt  = if (reverse) boolOptions else options
+        return value.toDouble(opt ?: DefaultOptions).toInt()
     }
 
-    override fun asFloat(options: CreatorVariant?): Float? {
-        return value.toDouble(options ?: DefaultOptions).toFloat()
+    override fun asFloat(options: CreatorVariant?, reverse : Boolean ): Float? {
+        val opt  = if (reverse) boolOptions else options
+        return value.toDouble(opt ?: DefaultOptions).toFloat()
     }
 
-    override fun asString(options: CreatorVariant?): String {
-        if (options != null) {
-            return if (value) options.trueString else options.falseString
+    override fun asString(options: CreatorVariant? , reverse : Boolean ): String {
+        val opt  = if (reverse) boolOptions else options
+        if (opt != null) {
+            return if (value) opt.trueString else opt.falseString
         }
         return value.toString()
     }
 
-    override fun setFromPayload(data: IConvertible): Boolean {
-        value = data.asBool(boolOptions) ?: return false
+    override fun setFromPayload(data: IConvertible, reverse : Boolean ): Boolean {
+        value = data.asBool(boolOptions, reverse) ?: return false
         return true
     }
 }
@@ -103,25 +106,29 @@ data class BoolPayload(private val boolOptions: BoolOptions, private var value: 
 
 data class IntPayload(private val intOptions: IntOptions,
                       private var value: Int = 0) : SignalPayload(), IConvertible {
-    override fun asBool(options: CreatorVariant?): Boolean? {
-        return value.toBool(options ?: DefaultOptions)
+    override fun asBool(options: CreatorVariant?, reverse : Boolean): Boolean? {
+        val opt  = if (reverse) intOptions else options
+        return value.toBool(opt ?: DefaultOptions)
     }
 
-    override fun asInt(options: CreatorVariant?): Int {
-        val opt = options ?: DefaultOptions
-        return value * opt.multiplier + opt.shift
+    override fun asInt(options: CreatorVariant?, reverse : Boolean): Int {
+        val opt : CreatorVariant = if (reverse) intOptions else options ?: DefaultOptions
+        return when (reverse) {
+            true -> (value - opt.shift) / opt.multiplier
+            false -> value * opt.multiplier + opt.shift
+        }
     }
 
-    override fun asFloat(options: CreatorVariant?): Float? {
-        return asInt(options).toFloat()
+    override fun asFloat(options: CreatorVariant?, reverse : Boolean): Float? {
+        return asInt(options, reverse).toFloat()
     }
 
-    override fun asString(options: CreatorVariant?): String {
-        return asInt(options).toString()
+    override fun asString(options: CreatorVariant?, reverse : Boolean): String {
+        return asInt(options, reverse).toString()
     }
 
-    override fun setFromPayload(data: IConvertible): Boolean {
-        value = data.asInt(intOptions) ?: return false
+    override fun setFromPayload(data: IConvertible, reverse : Boolean): Boolean {
+        value = data.asInt(intOptions, reverse) ?: return false
         return true
     }
 }
@@ -131,25 +138,29 @@ data class IntPayload(private val intOptions: IntOptions,
 
 data class FloatPayload(private val floatOptions: FloatOptions,
                         private var value: Float = 0F) : SignalPayload(), IConvertible {
-    override fun asBool(options: CreatorVariant?): Boolean? {
-        return value.toBool(options ?: DefaultOptions)
+    override fun asBool(options: CreatorVariant?, reverse : Boolean): Boolean? {
+        val opt  = if (reverse) floatOptions else options
+        return value.toBool(opt ?: DefaultOptions)
     }
 
-    override fun asInt(options: CreatorVariant?): Int {
+    override fun asInt(options: CreatorVariant?, reverse: Boolean): Int {
         return asFloat(options).toInt()
     }
 
-    override fun asFloat(options: CreatorVariant?): Float {
-        val opt = options ?: DefaultOptions
-        return value * opt.multiplier + opt.shift
+    override fun asFloat(options: CreatorVariant?, reverse: Boolean): Float {
+        val opt : CreatorVariant = if (reverse) floatOptions else options ?: DefaultOptions
+        return when (reverse) {
+            true -> (value - opt.shift) / opt.multiplier
+            false -> value * opt.multiplier + opt.shift
+        }
     }
 
-    override fun asString(options: CreatorVariant?): String {
-        return asInt(options).toString()
+    override fun asString(options: CreatorVariant?, reverse: Boolean): String {
+        return asFloat(options).toString()
     }
 
-    override fun setFromPayload(data: IConvertible): Boolean {
-        value = data.asFloat(floatOptions) ?: return false
+    override fun setFromPayload(data: IConvertible, reverse: Boolean): Boolean {
+        value = data.asFloat(floatOptions, reverse) ?: return false
         return true
     }
 }
@@ -158,8 +169,10 @@ data class FloatPayload(private val floatOptions: FloatOptions,
 
 data class StringPayload(private val stringOptions: StringOptions,
                          private var value: String = "") : SignalPayload(), IConvertible {
-    override fun asBool(options: CreatorVariant?): Boolean? {
-        val opt = options ?: DefaultOptions
+
+
+    override fun asBool(options: CreatorVariant?, reverse: Boolean): Boolean? {
+        val opt  = if (reverse) stringOptions else options ?: DefaultOptions
         return when (value) {
             opt.trueString -> true
             opt.falseString -> false
@@ -167,27 +180,32 @@ data class StringPayload(private val stringOptions: StringOptions,
         }
     }
 
-    override fun asInt(options: CreatorVariant?): Int? {
-        val opt = options ?: DefaultOptions
-        return (value.toIntOrNull() ?: return null) * opt.multiplier + opt.shift
+    override fun asInt(options: CreatorVariant?, reverse: Boolean): Int? {
+        val opt  = if (reverse) stringOptions else options ?: DefaultOptions
+        return when (reverse) {
+            true -> ((value.toIntOrNull() ?: return null) - opt.shift) / opt.multiplier
+            false -> (value.toIntOrNull() ?: return null) * opt.multiplier + opt.shift
+        }
     }
 
-    override fun asFloat(options: CreatorVariant?): Float? {
-        val opt = options ?: DefaultOptions
-        return (value.toFloatOrNull() ?: return null) * opt.multiplier + opt.shift
+    override fun asFloat(options: CreatorVariant?, reverse: Boolean): Float? {
+        val opt  = if (reverse) stringOptions else options ?: DefaultOptions
+        return when (reverse) {
+            true -> ((value.toFloatOrNull() ?: return null) - opt.shift) / opt.multiplier
+            false -> (value.toFloatOrNull() ?: return null) * opt.multiplier + opt.shift
+        }
     }
 
-    override fun asString(options: CreatorVariant?): String {
+    override fun asString(options: CreatorVariant?, reverse: Boolean): String {
         return value
     }
 
-    override fun setFromPayload(data: IConvertible): Boolean {
-        value = data.asString(stringOptions)
+    override fun setFromPayload(data: IConvertible, reverse: Boolean): Boolean {
+        value = data.asString(stringOptions, reverse )
         return true
     }
 
 }
-
 
 
 fun Number.toBool(options: CreatorVariant): Boolean? {
