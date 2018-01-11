@@ -1,10 +1,10 @@
 package com.lfom.signals
 
 
-
 /**
  * Created by gener on 08.01.2018.
  */
+
 class SignalChannel(val idx: Int, val options: IPayloadCreator) : IPublishing, IArriving {
     var payload: SignalPayload? = null
         private set
@@ -15,7 +15,7 @@ class SignalChannel(val idx: Int, val options: IPayloadCreator) : IPublishing, I
     var arrivedCallback: ((data: SignalPayload, sender: IArriving?, receiver: SignalChannel?) -> Unit)? = null
 
     var publishListener: IPublishing? = null
-    var refreshTimePoint = Date(0) // TODO Формат хранения записи ??
+    var timePoint : Long = 0
 
     private val arrivingDataEventManager = ArrivingDataEventManager()
 
@@ -30,40 +30,47 @@ class SignalChannel(val idx: Int, val options: IPayloadCreator) : IPublishing, I
             т.к. текущий канал не знает какие преобразование претерпели данные
             -- без refreshDataWhenPublish не обновлять данные , а только преобразовывать на основе их копии
          */
-        var payloadBuf = options.create()
         if (refreshDataWhenPublish) {
-            InverseSetInnerPayload(data)  // TODO("Нужно обратное преобразование")
-            payload?.let { payloadBuf = it }
-
+            setInnerPayload(data, reverse = true)
         }
-        publishCallback?.invoke(data, sender, this)
-        publishListener?.publish(data, this)
+        var payloadBuf = options.create()
+        when (data) {
+            is IConvertible -> {
+                if (!(payloadBuf as IConvertible).setFromPayload(data, reverse = true)){
+                    payloadBuf = BadData(BadData.CONVERSION_ERROR)
+                }
+            }
+            is BadData -> payloadBuf = data.copy()
+        }
+        publishCallback?.invoke(payloadBuf, sender, this)
+        publishListener?.publish(payloadBuf, this)
     }
 
     override fun onNewPayload(data: SignalPayload, sender: IArriving?) {
         //runBlocking {
         //    mutex.withLock {
-        setInnerPayload(data)
+        setInnerPayload(data, reverse = false)
         //    }
         //}
         arrivedCallback?.invoke(data, sender, this)
         notifyListeners(payload ?: return)
     }
 
-    fun setInnerPayload(data: SignalPayload) {
+    fun setInnerPayload(data: SignalPayload, reverse : Boolean)  {
+        timePoint = System.currentTimeMillis()
         when (data) {
             is IConvertible -> {
                 if (payload == null || payload is BadData) {
                     payload = options.create()
                 }
-                (payload as IConvertible).setFromPayload(data) // TODO Отработка ошибки конвертации
+                if (!(payload as IConvertible).setFromPayload(data, reverse)) { // TODO Отработка ошибки конвертации
+                    payload = BadData(BadData.CONVERSION_ERROR)
+                }
             }
-            is BadData -> this.payload = data.copy()
+            is BadData -> payload = data.copy()
         }
-        refreshTimePoint = Date()
     }
 }
-
 
 /**
  * Для отправки значения на сервер

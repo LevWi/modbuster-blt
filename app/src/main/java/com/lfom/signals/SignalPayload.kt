@@ -69,7 +69,11 @@ class StringOptions : CreatorVariant() , IPayloadCreator{
 
 sealed class SignalPayload
 
-data class BadData(val message: String = "BAD") : SignalPayload()
+data class BadData(val message: String = "BAD") : SignalPayload() {
+    companion object {
+        const val CONVERSION_ERROR = "CONVERSION_ERROR"
+    }
+}
 
 data class BoolPayload(private val boolOptions: BoolOptions, private var value: Boolean = false) : SignalPayload(), IConvertible {
 

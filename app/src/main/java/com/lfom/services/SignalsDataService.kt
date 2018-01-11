@@ -1,11 +1,10 @@
 package com.lfom.services
 
-import com.lfom.signals.Signal
-
 import android.app.Service
 import android.content.Intent
 import android.os.Binder
 import android.os.IBinder
+import com.lfom.signals.SignalChannel
 import org.eclipse.paho.android.service.MqttAndroidClient
 
 
@@ -36,7 +35,7 @@ class SignalsDataService : Service() {
      - другое действие, уведомляем подписанных приемников
      */
 
-    var mSignals: Map<Int, Signal> = ConcurrentHashMap()
+    var mSignals: Map<Int, SignalChannel> = ConcurrentHashMap()
         private set
 
 
@@ -58,10 +57,5 @@ data class MqttSignalEntry(val topicSubscribe: String,
                            val topicPublish: String = "",
                            val idSignal: Int,
                            var failBinding: Boolean = false,
-                           var signal: Signal? = null) {
+                           var signal: SignalChannel)
 
-}
-
-fun MqttSignalEntry.send() {
-    this.idSignal
-}
