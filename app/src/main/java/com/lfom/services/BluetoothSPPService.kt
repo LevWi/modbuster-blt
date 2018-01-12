@@ -34,7 +34,7 @@ class BluetoothSPPService : Service() {
     private fun TestTask() {
         Thread(Runnable {
             for (i in 1..30) {
-                /*TODO Не работает Log debug*/ Log.d(LOG_TAG, "i = " + i)
+                Log.d(LOG_TAG, "i = " + i)
                 try {
                     Thread.sleep(1000)
                     if (mISigServCallBack != null) {

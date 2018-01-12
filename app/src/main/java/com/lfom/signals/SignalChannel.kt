@@ -5,7 +5,7 @@ package com.lfom.signals
  * Created by gener on 08.01.2018.
  */
 
-class SignalChannel(val idx: Int, val options: IPayloadCreator) : IPublishing, IArriving {
+data class SignalChannel(val idx: Int, val options: IPayloadCreator) : IPublishing, IArriving {
     var payload: SignalPayload? = null
         private set
     var name: String = ""
@@ -24,12 +24,6 @@ class SignalChannel(val idx: Int, val options: IPayloadCreator) : IPublishing, I
     }
 
     override fun publish(data: SignalPayload, sender: IPublishing?) {
-        /* TODO
-
-            -- для обратного преобразования использовать настройки пришедшего data
-            т.к. текущий канал не знает какие преобразование претерпели данные
-            -- без refreshDataWhenPublish не обновлять данные , а только преобразовывать на основе их копии
-         */
         if (refreshDataWhenPublish) {
             setInnerPayload(data, reverse = true)
         }
