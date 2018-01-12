@@ -27,13 +27,13 @@ sealed class CreatorVariant(val writeble: Boolean = false) {
         }
     var highLevel = 1.0
         set(value) {
-            if (writeble) field = value
+            if (writeble && value != 0.0) field = value
         }
     var lowLevel = 0.0
         set(value) {
             if (writeble) field = value
         }
-    var multiplier = 1
+    var multiplier = 1.0
         set(value) {
             if (writeble) field = value
         }
@@ -120,7 +120,7 @@ data class IntPayload(private val intOptions: IntOptions,
         return when (reverse) {
             true -> (value - opt.shift) / opt.multiplier
             false -> value * opt.multiplier + opt.shift
-        }
+        }.toInt()
     }
 
     override fun asFloat(options: CreatorVariant?, reverse : Boolean): Float? {
@@ -156,7 +156,7 @@ data class FloatPayload(private val floatOptions: FloatOptions,
         return when (reverse) {
             true -> (value - opt.shift) / opt.multiplier
             false -> value * opt.multiplier + opt.shift
-        }
+        }.toFloat()
     }
 
     override fun asString(options: CreatorVariant?, reverse: Boolean): String {
@@ -189,7 +189,7 @@ data class StringPayload(private val stringOptions: StringOptions,
         return when (reverse) {
             true -> ((value.toIntOrNull() ?: return null) - opt.shift) / opt.multiplier
             false -> (value.toIntOrNull() ?: return null) * opt.multiplier + opt.shift
-        }
+        }.toInt()
     }
 
     override fun asFloat(options: CreatorVariant?, reverse: Boolean): Float? {
@@ -197,7 +197,7 @@ data class StringPayload(private val stringOptions: StringOptions,
         return when (reverse) {
             true -> ((value.toFloatOrNull() ?: return null) - opt.shift) / opt.multiplier
             false -> (value.toFloatOrNull() ?: return null) * opt.multiplier + opt.shift
-        }
+        }.toFloat()
     }
 
     override fun asString(options: CreatorVariant?, reverse: Boolean): String {

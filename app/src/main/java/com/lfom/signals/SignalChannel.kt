@@ -57,9 +57,11 @@ data class SignalChannel(val idx: Int, val options: IPayloadCreator) : IPublishi
                 if (payload == null || payload is BadData) {
                     payload = options.create()
                 }
-                if (!(payload as IConvertible).setFromPayload(data, reverse)) { // TODO Отработка ошибки конвертации
+                // При отработке гистерезиса будет ошибка
+                /*if (!(payload as IConvertible).setFromPayload(data, reverse)) {
                     payload = BadData(BadData.CONVERSION_ERROR)
-                }
+                }*/
+                (payload as IConvertible).setFromPayload(data, reverse)
             }
             is BadData -> payload = data.copy()
         }
