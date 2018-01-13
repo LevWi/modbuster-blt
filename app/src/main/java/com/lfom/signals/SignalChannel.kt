@@ -17,7 +17,7 @@ data class SignalChannel(val idx: Int, val options: IPayloadCreator) : IPublishi
     var publishListener: IPublishing? = null
     var timePoint : Long = 0
 
-    private val arrivingDataEventManager = ArrivingDataEventManager()
+    val arrivingDataEventManager = ArrivingDataEventManager()
 
     fun notifyListeners(data: SignalPayload) {
         arrivingDataEventManager.notifyListeners(data, this)

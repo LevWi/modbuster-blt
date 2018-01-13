@@ -61,8 +61,10 @@ class SignalsDataService : Service() {
         val mqttAndroidClient = MqttAndroidClient(applicationContext, serverUri, clientId)
 
         val newSignal = SignalChannel(33, IntOptions()).also {
-            it.arrivedCallback = {
-
+            it.name = "WB_Rele_1"
+            it.arrivedCallback = { data, _, _ ->
+                val string = (data as? IConvertible)?.asString(null)
+                Log.d(TAG, "Received ${it.name} = $string")
             }
         }
         mSignals.put(newSignal.idx, newSignal)
@@ -71,11 +73,14 @@ class SignalsDataService : Service() {
         client.addNewSignalEntry(
                 client.MqttSignalEntry("/devices/wb-gpio/controls/Relay_1",
                         "/devices/wb-gpio/controls/Relay_1/on"
-                        ).also { it.signal = newSignal}
+                ).also {
+                    it.signal = newSignal
+                    newSignal.publishListener = it
+                }
         )
 
         mqttClients.add(client)
-
+        client.connect()
     }
 }
 
@@ -91,10 +96,11 @@ class MqttClientAdapter(val mqttAndroidClient: MqttAndroidClient,
         val messageListener = IMqttMessageListener { topic, message ->
             signal?.let {
                 val str = String(message.payload)
+                Log.i(TAG, "Message arrived $topic = $str")
                 it.onNewPayload(
                         StringPayload(StringOptions(), str),
                         null)
-                Log.d(TAG, "Message arrived $topic = str")
+
             }
         }
 
@@ -134,7 +140,7 @@ class MqttClientAdapter(val mqttAndroidClient: MqttAndroidClient,
 
             @Throws(Exception::class)
             override fun messageArrived(topic: String, message: MqttMessage) {
-                Log.i(TAG, "Incoming message: " + String(message.payload))
+                Log.i(TAG, "Incoming message: $topic ${String(message.payload)}")
             }
 
             override fun deliveryComplete(token: IMqttDeliveryToken) {

@@ -9,7 +9,7 @@ class ArrivingDataEventManager {
     private val mListeners = arrayListOf<IArriving>()
 
     fun subscribe(listener: IArriving) {
-        mListeners.firstOrNull({ it == listener }) ?: mListeners.add(listener)
+        mListeners.firstOrNull({ it === listener }) ?: mListeners.add(listener)
     }
 
     fun unsubscribe(listener: IArriving) {
