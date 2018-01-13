@@ -36,9 +36,9 @@ class SignalsDataService : Service() {
 
      */
 
-    var mSignals: Map<Int, SignalChannel> = ConcurrentHashMap()
-        private set
+    val mSignals: MutableMap<Int, SignalChannel> = ConcurrentHashMap()
 
+    val mqttClients = arrayListOf<MqttClientAdapter>()
 
     inner class SigDataServiceBinder : Binder() {
         val service: SignalsDataService
@@ -47,6 +47,35 @@ class SignalsDataService : Service() {
 
     override fun onBind(intent: Intent?): IBinder {
         return mSigDataServiceBinder
+    }
+
+    internal val serverUri = "tcp://192.168.10.11:1883"
+
+    fun startWork() {
+
+        val clientId = "ExampleAndroidClient" + System.currentTimeMillis()
+        val mqttConnectOptions = MqttConnectOptions()
+        mqttConnectOptions.isAutomaticReconnect = true
+        mqttConnectOptions.isCleanSession = false
+
+        val mqttAndroidClient = MqttAndroidClient(applicationContext, serverUri, clientId)
+
+        val newSignal = SignalChannel(33, IntOptions()).also {
+            it.arrivedCallback = {
+
+            }
+        }
+        mSignals.put(newSignal.idx, newSignal)
+
+        val client = MqttClientAdapter(mqttAndroidClient, mqttConnectOptions)
+        client.addNewSignalEntry(
+                client.MqttSignalEntry("/devices/wb-gpio/controls/Relay_1",
+                        "/devices/wb-gpio/controls/Relay_1/on"
+                        ).also { it.signal = newSignal}
+        )
+
+        mqttClients.add(client)
+
     }
 }
 
@@ -81,11 +110,38 @@ class MqttClientAdapter(val mqttAndroidClient: MqttAndroidClient,
 
     val mqttEntries = arrayListOf<MqttSignalEntry>()
 
-    fun addNewSignalEntry(signal : MqttSignalEntry){
+    fun addNewSignalEntry(signal: MqttSignalEntry) {
         mqttEntries.add(signal)
     }
 
     fun connect() {
+
+        mqttAndroidClient.setCallback(object : MqttCallbackExtended {
+            override fun connectComplete(reconnect: Boolean, serverURI: String) {
+
+                if (reconnect) {
+                    Log.i(TAG, "Reconnected to : " + serverURI)
+                    // Because Clean Session is true, we need to re-subscribe
+                    subscribeToTopic()
+                } else {
+                    Log.i(TAG, "Connected to: " + serverURI)
+                }
+            }
+
+            override fun connectionLost(cause: Throwable) {
+                Log.w(TAG, "The Connection was lost.")
+            }
+
+            @Throws(Exception::class)
+            override fun messageArrived(topic: String, message: MqttMessage) {
+                Log.i(TAG, "Incoming message: " + String(message.payload))
+            }
+
+            override fun deliveryComplete(token: IMqttDeliveryToken) {
+
+            }
+        })
+
         try {
             mqttAndroidClient.connect(mqttConnectOptions, null, object : IMqttActionListener {
                 override fun onSuccess(asyncActionToken: IMqttToken) {
