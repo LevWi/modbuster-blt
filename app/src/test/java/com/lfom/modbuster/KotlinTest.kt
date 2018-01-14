@@ -8,7 +8,6 @@ import com.lfom.signals.SignalChannel
 import com.squareup.moshi.KotlinJsonAdapterFactory
 import com.squareup.moshi.Moshi
 
-import org.eclipse.paho.android.service.MqttAndroidClient
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions
 import org.junit.Test
 import java.util.concurrent.ConcurrentHashMap
