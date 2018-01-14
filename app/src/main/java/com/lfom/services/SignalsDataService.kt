@@ -49,7 +49,7 @@ class SignalsDataService : Service() {
         return mSigDataServiceBinder
     }
 
-    internal val serverUri = "tcp://192.168.10.11:1883"
+    private val serverUri = "tcp://192.168.10.11:1883"
 
     fun startWork() {
 
@@ -64,7 +64,7 @@ class SignalsDataService : Service() {
             it.name = "WB_Rele_1"
             it.arrivedCallback = { data, _, _ ->
                 val string = (data as? IConvertible)?.asString(null)
-                Log.d(TAG, "Received ${it.name} = $string")
+                Log.d(TAG, "Received signal ${it.name} = $string")
             }
         }
         mSignals.put(newSignal.idx, newSignal)
@@ -96,11 +96,10 @@ class MqttClientAdapter(val mqttAndroidClient: MqttAndroidClient,
         val messageListener = IMqttMessageListener { topic, message ->
             signal?.let {
                 val str = String(message.payload)
-                Log.i(TAG, "Message arrived $topic = $str")
+                Log.d(TAG, "Message arrived $topic = $str")
                 it.onNewPayload(
                         StringPayload(StringOptions(), str),
                         null)
-
             }
         }
 
@@ -140,7 +139,7 @@ class MqttClientAdapter(val mqttAndroidClient: MqttAndroidClient,
 
             @Throws(Exception::class)
             override fun messageArrived(topic: String, message: MqttMessage) {
-                Log.i(TAG, "Incoming message: $topic ${String(message.payload)}")
+                Log.d(TAG, "Incoming message: $topic ${String(message.payload)}")
             }
 
             override fun deliveryComplete(token: IMqttDeliveryToken) {
@@ -205,7 +204,7 @@ class MqttClientAdapter(val mqttAndroidClient: MqttAndroidClient,
             val message = MqttMessage()
             message.payload = payloadString.toByteArray()
             mqttAndroidClient.publish(topic, message)
-            Log.v(TAG, "TO SERVICE: $topic = $message")
+            Log.v(TAG, "to service: $topic = $message")
             if (!mqttAndroidClient.isConnected) {
                 Log.d(TAG, "${mqttAndroidClient.bufferedMessageCount} messages in buffer.")
             }
