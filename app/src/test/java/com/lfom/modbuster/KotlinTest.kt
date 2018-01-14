@@ -1,9 +1,14 @@
 package com.lfom.modbuster
 
+//import com.google.gson.Gson
+//import com.google.gson.GsonBuilder
 import com.lfom.services.MqttClientAdapter
+import com.lfom.signals.IntOptions
 import com.lfom.signals.SignalChannel
-//import com.squareup.moshi.KotlinJsonAdapterFactory
-//import com.squareup.moshi.Moshi
+import com.squareup.moshi.KotlinJsonAdapterFactory
+import com.squareup.moshi.Moshi
+
+import org.eclipse.paho.android.service.MqttAndroidClient
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions
 import org.junit.Test
 import java.util.concurrent.ConcurrentHashMap
@@ -21,12 +26,14 @@ class KotlinTest {
     private val serverUri = "tcp://192.168.10.11:1883"
 
     @Test
-    fun fun1(){
+    fun fun1() {
         val clientId = "ExampleAndroidClient" + System.currentTimeMillis()
         val mqttConnectOptions = MqttConnectOptions()
+        mqttConnectOptions.userName = "USER123"
+        mqttConnectOptions.password = "ЛЕВblablaPassword".toCharArray()
         mqttConnectOptions.isAutomaticReconnect = true
         mqttConnectOptions.isCleanSession = false
-
+        mqttConnectOptions.serverURIs = arrayOf("tcp://localhost:1883", "ssl://localhost:8883")
 /*        val mqttAndroidClient = MqttAndroidClient(applicationContext, serverUri, clientId)
 
         val newSignal = SignalChannel(33, IntOptions()).also {
@@ -46,12 +53,50 @@ class KotlinTest {
 
         mqttClients.add(client)*/
 
-/*        val moshi = Moshi.Builder()
+        val moshi = Moshi.Builder()
                 // Add any other JsonAdapter factories.
                 .add(KotlinJsonAdapterFactory())
                 .build()
-        val adapter = moshi.adapter<MqttConnectOptions>(MqttConnectOptions::class.java)
-        val str = adapter.toJson(mqttConnectOptions)*/
-        println()
+        val adapter = moshi.adapter<IntOptions>(IntOptions::class.java)
+        val str = adapter.toJson(IntOptions())
+        println(str)
+
+        val newSignal = SignalChannel(33, IntOptions()).also {
+            it.name = "WB_Rele_1"
+        }
+        val strSignal = moshi.adapter<SignalChannel>(SignalChannel::class.java).toJson(newSignal)
+        println(strSignal)
+
+
+        /*       val gson = GsonBuilder().setPrettyPrinting().create()
+        println(gson.toJson(mqttConnectOptions))
+        println("=================")
+        val newSignal = SignalChannel(33, IntOptions()).also {
+            it.name = "WB_Rele_1"
+        }
+        println(gson.toJson(newSignal))
+
+        val stringSignal =
+                """
+                    {
+  "name": "WB_Rele_1",
+  "refreshDataWhenPublish": false,
+  "timePoint": 0,
+    "arrivingDataEventManager": {
+    "mListeners": []
+  },
+  "idx": 33,
+  "options": {
+    "trueString": "true",
+    "falseString": "false",
+    "highLevel": 1.0,
+    "lowLevel": 0.0,
+    "multiplier": 1.0,
+    "shift": 0,
+    "writeble": false
+  }
+}
+                    """
+        val newSignal1 = gson.fromJson(stringSignal, SignalChannel::class.java)*/
     }
 }
