@@ -8,17 +8,25 @@ import org.eclipse.paho.client.mqttv3.*
 /**
  *
  */
-class MqttClientAdapter(val mqttAndroidClient: MqttAndroidClient,
-                        val mqttConnectOptions: MqttConnectOptions) {
+class MqttClientHelper(val mqttAndroidClient: MqttAndroidClient,
+                       val mqttConnectOptions: MqttConnectOptions) {
 
-    inner class MqttSignalEntry(val topicGeneral: String,
-                                val topicForPublish: String = "",
-                                val qos: Int = 0) : IPublishing {
+    class MqttSignalEntry(val topicGeneral: String,
+                          val topicForPublish: String? = "",
+                          val idxReceiver: Int = 0
+    ) : IPublishing {
 
-        var signal: SignalChannel? = null
+        var qos: Int = 0
 
+        @Transient
+        var client : MqttClientHelper? = null
+
+        @Transient
+        var signalLink: SignalChannel? = null
+
+        @Transient
         val messageListener = IMqttMessageListener { topic, message ->
-            signal?.let {
+            signalLink?.let {
                 val str = String(message.payload)
                 Log.d(MAIN_DATA_SERVICE_TAG, "Message arrived $topic = $str")
                 it.onNewPayload(
@@ -28,19 +36,25 @@ class MqttClientAdapter(val mqttAndroidClient: MqttAndroidClient,
         }
 
         override fun publish(data: SignalPayload, sender: IPublishing?) {
+            client ?: return
             if (data is IConvertible) {
                 val payload = data.asString(null, reverse = true)
-                val topic = if (topicForPublish != "") topicForPublish else topicGeneral
-                publishMessageToService(topic, payload)
+                val topic = if (topicForPublish == "" || topicForPublish == null) topicGeneral else topicForPublish
+                client?.publishMessageToService(topic, payload)
             }
         }
     }
 
+    @SuppressWarnings("unused")
+    private constructor() {
+
+    }
 
     val mqttEntries = arrayListOf<MqttSignalEntry>()
 
     fun addNewSignalEntry(signal: MqttSignalEntry) {
         mqttEntries.add(signal)
+        signal.client = this
     }
 
     fun connect() {

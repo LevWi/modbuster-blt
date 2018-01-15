@@ -36,7 +36,7 @@ class SignalsDataService : Service() {
 
      */
 
-    val mSignals: MutableMap<Int, SignalChannel> = ConcurrentHashMap()
+    val signals: MutableMap<Int, SignalChannel> = ConcurrentHashMap()
 
     val mqttClients = arrayListOf<MqttClientAdapter>()
 
@@ -67,7 +67,7 @@ class SignalsDataService : Service() {
                 Log.d(MAIN_DATA_SERVICE_TAG, "Received signal ${it.name} = $string")
             }
         }
-        mSignals.put(newSignal.idx, newSignal)
+        signals.put(newSignal.idx, newSignal)
 
         val client = MqttClientAdapter(mqttAndroidClient, mqttConnectOptions)
         client.addNewSignalEntry(
