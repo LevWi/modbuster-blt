@@ -92,14 +92,18 @@ class SignalsDataService : Service() {
                 .add(MqttClientHelperJsonAdapter(applicationContext))
                 .add(MqttConnectOptionsJsonAdapter())
                 .build()
-        val adapter = moshi.adapter(ServiceConfig::class.java)
 
-        val config = ServiceConfig(signals, mqttClients)
+        val adapter = moshi.adapter(MqttClientHelper::class.java)
 
-        val str = adapter.toJson(config).toByteArray()
+        val str = adapter.toJson(mqttClients[0])
+
+
+        //val config = ServiceConfig(signals, mqttClients)
+
+        //val str = adapter.toJson(config).toByteArray()
 
         val outFileStream = openFileOutput("default.prj", Context.MODE_PRIVATE)
-        outFileStream.use { out -> out.write(str) }
+        outFileStream.use { out -> out.write(str.toByteArray()) }
 
     }
 }

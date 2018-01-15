@@ -84,7 +84,7 @@ class MqttConnectOptionsJsonAdapter {
         return MqttConnectOptionsJson(
                 keepAliveInterval = mqttConnectOptions.keepAliveInterval,
                 userName = mqttConnectOptions.userName,
-                password = mqttConnectOptions.password.toString(),
+                password = mqttConnectOptions.password?.toString(),
                 cleanSession = mqttConnectOptions.isCleanSession,
                 connectionTimeout = mqttConnectOptions.connectionTimeout,
                 automaticReconnect = mqttConnectOptions.isAutomaticReconnect
