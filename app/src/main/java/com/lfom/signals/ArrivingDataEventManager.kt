@@ -1,11 +1,13 @@
 package com.lfom.signals
 
-/**
- * Created by gener on 08.01.2018.
- */
+import com.squareup.moshi.Json
+
 
 class ArrivingDataEventManager {
 
+    @Json(name = "receivers") val listnersIds = arrayListOf<Int>()
+
+    @Transient
     private val mListeners = arrayListOf<IArriving>()
 
     fun subscribe(listener: IArriving) {

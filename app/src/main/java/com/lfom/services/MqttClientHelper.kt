@@ -45,11 +45,6 @@ class MqttClientHelper(val mqttAndroidClient: MqttAndroidClient,
         }
     }
 
-    @SuppressWarnings("unused")
-    private constructor() {
-
-    }
-
     val mqttEntries = arrayListOf<MqttSignalEntry>()
 
     fun addNewSignalEntry(signal: MqttSignalEntry) {

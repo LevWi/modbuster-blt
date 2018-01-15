@@ -6,15 +6,25 @@ package com.lfom.signals
  */
 
 data class SignalChannel(val idx: Int, val options: IPayloadCreator) : IPublishing, IArriving {
+
+    @Transient
     var payload: SignalPayload? = null
         private set
+
     var name: String = ""
+
     var refreshDataWhenPublish = false
 
+    @Transient
     var publishCallback: ((data: SignalPayload, sender: IPublishing?, receiver: SignalChannel?) -> Unit)? = null
+
+    @Transient
     var arrivedCallback: ((data: SignalPayload, sender: IArriving?, receiver: SignalChannel?) -> Unit)? = null
 
+    @Transient
     var publishListener: IPublishing? = null
+
+    @Transient
     var timePoint : Long = 0
 
     val arrivingDataEventManager = ArrivingDataEventManager()
@@ -57,10 +67,6 @@ data class SignalChannel(val idx: Int, val options: IPayloadCreator) : IPublishi
                 if (payload == null || payload is BadData) {
                     payload = options.create()
                 }
-                // При отработке гистерезиса будет ошибка
-                /*if (!(payload as IConvertible).setFromPayload(data, reverse)) {
-                    payload = BadData(BadData.CONVERSION_ERROR)
-                }*/
                 (payload as IConvertible).setFromPayload(data, reverse)
             }
             is BadData -> payload = data.copy()

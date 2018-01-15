@@ -69,7 +69,7 @@ class SignalsDataService : Service() {
         }
         signals.put(newSignal.idx, newSignal)
 
-        val client = MqttClientAdapter(mqttAndroidClient, mqttConnectOptions)
+        val client = MqttClientHelper(mqttAndroidClient, mqttConnectOptions)
         client.addNewSignalEntry(
                 client.MqttSignalEntry("/devices/wb-gpio/controls/Relay_1",
                         "/devices/wb-gpio/controls/Relay_1/on"
