@@ -11,10 +11,7 @@ import kotlin.collections.ArrayList
 
 
 
-class JsonServiceConfig(
-        val signals: MutableMap<Int, SignalChannel> = mutableMapOf(),
-        @Json(name = "mqtt_connections") val mqttClients: ArrayList<MqttClientHelper> = arrayListOf()
-)
+
 
 class MqttClientHelperJson(
         @Json(name = "uri") val serverUri : String ,

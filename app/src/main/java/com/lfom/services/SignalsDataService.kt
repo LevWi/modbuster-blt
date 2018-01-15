@@ -2,11 +2,14 @@ package com.lfom.services
 
 
 import android.app.Service
+import android.content.Context
 import android.content.Intent
 import android.os.Binder
 import android.os.IBinder
 import android.util.Log
 import com.lfom.signals.*
+import com.squareup.moshi.KotlinJsonAdapterFactory
+import com.squareup.moshi.Moshi
 import org.eclipse.paho.android.service.MqttAndroidClient
 import org.eclipse.paho.client.mqttv3.*
 import java.util.concurrent.ConcurrentHashMap
@@ -15,7 +18,6 @@ import java.util.concurrent.ConcurrentHashMap
 /**
  * Created by gener on 03.01.2018.
  */
-
 
 
 class SignalsDataService : Service() {
@@ -38,7 +40,7 @@ class SignalsDataService : Service() {
 
     val signals: MutableMap<Int, SignalChannel> = ConcurrentHashMap()
 
-    val mqttClients = arrayListOf<MqttClientAdapter>()
+    val mqttClients = arrayListOf<MqttClientHelper>()
 
     inner class SigDataServiceBinder : Binder() {
         val service: SignalsDataService
@@ -70,17 +72,35 @@ class SignalsDataService : Service() {
         signals.put(newSignal.idx, newSignal)
 
         val client = MqttClientHelper(mqttAndroidClient, mqttConnectOptions)
+
         client.addNewSignalEntry(
-                client.MqttSignalEntry("/devices/wb-gpio/controls/Relay_1",
+                MqttClientHelper.MqttSignalEntry("/devices/wb-gpio/controls/Relay_1",
                         "/devices/wb-gpio/controls/Relay_1/on"
                 ).also {
-                    it.signal = newSignal
+                    it.receiver = newSignal
                     newSignal.publishListener = it
                 }
         )
 
         mqttClients.add(client)
-        client.connect()
+        //client.connect()
+    }
+
+    fun generateJsonFile() {
+        val moshi = Moshi.Builder()
+                .add(KotlinJsonAdapterFactory())
+                .add(MqttClientHelperJsonAdapter(applicationContext))
+                .add(MqttConnectOptionsJsonAdapter())
+                .build()
+        val adapter = moshi.adapter(ServiceConfig::class.java)
+
+        val config = ServiceConfig(signals, mqttClients)
+
+        val str = adapter.toJson(config).toByteArray()
+
+        val outFileStream = openFileOutput("default.prj", Context.MODE_PRIVATE)
+        outFileStream.use { out -> out.write(str) }
+
     }
 }
 

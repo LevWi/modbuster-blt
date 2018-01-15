@@ -22,11 +22,11 @@ class MqttClientHelper(val mqttAndroidClient: MqttAndroidClient,
         var client : MqttClientHelper? = null
 
         @Transient
-        var signalLink: SignalChannel? = null
+        var receiver: SignalChannel? = null
 
         @Transient
         val messageListener = IMqttMessageListener { topic, message ->
-            signalLink?.let {
+            receiver?.let {
                 val str = String(message.payload)
                 Log.d(MAIN_DATA_SERVICE_TAG, "Message arrived $topic = $str")
                 it.onNewPayload(

@@ -25,7 +25,7 @@ class TestServiceActivity : AppCompatActivity() {
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
             boundService = (service as? SignalsDataService.SigDataServiceBinder)?.service
             boundService?.startWork()
-            val signal = boundService?.mSignals?.get(33)
+            val signal = boundService?.signals?.get(33)
             signal?.arrivingDataEventManager!!.subscribe(object : IArriving {
                 override fun onNewPayload(data: SignalPayload, sender: IArriving?) {
                     runOnUiThread {
@@ -54,11 +54,15 @@ class TestServiceActivity : AppCompatActivity() {
     }
 
     fun onReleOn(view: View) {
-        boundService?.mSignals?.get(33)?.publish(BoolPayload(BoolOptions(), true), null)
+        boundService?.signals?.get(33)?.publish(BoolPayload(BoolOptions(), true), null)
 
     }
 
     fun onReleOff(view: View) {
-        boundService?.mSignals?.get(33)?.publish(BoolPayload(BoolOptions(), false), null)
+        boundService?.signals?.get(33)?.publish(BoolPayload(BoolOptions(), false), null)
+    }
+
+    fun onGenerateJson(view: View){
+        boundService?.generateJsonFile()
     }
 }
