@@ -62,12 +62,17 @@ class SignalsDataService : Service() {
 
         val mqttAndroidClient = MqttAndroidClient(applicationContext, serverUri, clientId)
 
-        val newSignal = SignalChannel(33, IntOptions()).also {
+        val newSignal = SignalChannel(
+                33,
+                IntOptions()
+        ).also {
             it.name = "WB_Rele_1"
             it.arrivedCallback = { data, _, _ ->
                 val string = (data as? IConvertible)?.asString(null)
                 Log.d(MAIN_DATA_SERVICE_TAG, "Received signal ${it.name} = $string")
             }
+            it.arrivingDataEventManager.listnersIds.add(44)
+            it.arrivingDataEventManager.listnersIds.add(55)
         }
         signals.put(newSignal.idx, newSignal)
 
@@ -89,13 +94,18 @@ class SignalsDataService : Service() {
     fun generateJsonFile() {
         val moshi = Moshi.Builder()
                 .add(KotlinJsonAdapterFactory())
-                .add(MqttClientHelperJsonAdapter(applicationContext))
+                //.add(MqttAndroidClientJsonAdapter(applicationContext))
                 .add(MqttConnectOptionsJsonAdapter())
                 .build()
 
-        val adapter = moshi.adapter(MqttClientHelper::class.java)
+        val adapter = moshi.adapter(ServiceConfig::class.java)
 
-        val str = adapter.toJson(mqttClients[0])
+        val testConfig = ServiceConfig(
+                signals,
+                mqttClients.map { it.toJson() }
+        )
+
+        val str = adapter.toJson(testConfig)
 
 
         //val config = ServiceConfig(signals, mqttClients)

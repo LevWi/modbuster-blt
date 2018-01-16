@@ -1,29 +1,27 @@
 package com.lfom.services
 
-import android.content.Context
-import com.lfom.signals.SignalChannel
+
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.Json
+
 import com.squareup.moshi.ToJson
-import org.eclipse.paho.android.service.MqttAndroidClient
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions
-import kotlin.collections.ArrayList
 
 
 
 
 
 class MqttClientHelperJson(
-        @Json(name = "uri") val serverUri : String ,
-        @Json(name = "connect_id") val clientId : String? = null,
+        @Json(name = "uri") val serverUri: String,
+        @Json(name = "connect_id") val clientId: String? = null,
         @Json(name = "options") val mqttConnectOptions: MqttConnectOptions,
-        @Json(name = "topics") val mqttSignalEntryList: ArrayList<MqttClientHelper.MqttSignalEntry> = arrayListOf()
+        @Json(name = "topics") val mqttSignalEntryList: List<MqttClientHelper.MqttSignalEntry>
 )
 
-
+/*
 class MqttClientHelperJsonAdapter(val context: Context) {
     @FromJson
-    fun clientFromJson(json : MqttClientHelperJson) : MqttClientHelper {
+    fun clientFromJson(json: MqttClientHelperJson): MqttClientHelper {
         val mqttAndroidClient = MqttAndroidClient(
                 context,
                 json.serverUri,
@@ -39,15 +37,40 @@ class MqttClientHelperJsonAdapter(val context: Context) {
     }
 
     @ToJson
-    fun clientToJson(clientHelper : MqttClientHelper) : MqttClientHelperJson {
+    fun clientToJson(clientHelper: MqttClientHelper): MqttClientHelperJson {
         return MqttClientHelperJson(
-                clientHelper.mqttAndroidClient.serverURI,
-                clientHelper.mqttAndroidClient.clientId,
+                clientHelper.mqttAndroidClient?.serverURI,
+                clientHelper.mqttAndroidClient?.clientId,
                 clientHelper.mqttConnectOptions,
                 clientHelper.mqttEntries
         )
     }
-}
+}*/
+
+/*
+class MqttAndroidClientJson(
+        @Json(name = "uri") val serverUri: String,
+        @Json(name = "connect_id") val clientId: String? = null
+)
+
+class MqttAndroidClientJsonAdapter(val context: Context) {
+    @FromJson
+    fun clientFromJson(json: MqttAndroidClientJson): MqttAndroidClient {
+        return MqttAndroidClient(
+                context,
+                json.serverUri,
+                "${json.clientId}_${System.currentTimeMillis()}"
+        )
+    }
+
+    @ToJson
+    fun clientToJson(client: MqttAndroidClient): MqttAndroidClientJson {
+        return MqttAndroidClientJson(
+                client.serverURI,
+                client.clientId
+        )
+    }
+}*/
 
 class MqttConnectOptionsJson(
         @Json(name = "keep_alive_interval") val keepAliveInterval: Int = MqttConnectOptions.KEEP_ALIVE_INTERVAL_DEFAULT,

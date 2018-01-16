@@ -1,5 +1,6 @@
 package com.lfom.services
 
+import android.content.Context
 import android.util.Log
 import com.lfom.signals.*
 import org.eclipse.paho.android.service.MqttAndroidClient
@@ -19,7 +20,7 @@ class MqttClientHelper(val mqttAndroidClient: MqttAndroidClient,
         var qos: Int = 0
 
         @Transient
-        var client : MqttClientHelper? = null
+        var client: MqttClientHelper? = null
 
         @Transient
         var receiver: SignalChannel? = null
@@ -45,7 +46,35 @@ class MqttClientHelper(val mqttAndroidClient: MqttAndroidClient,
         }
     }
 
+    companion object {
+        fun create(context: Context, json: MqttClientHelperJson): MqttClientHelper {
+            val mqttAndroidClient = MqttAndroidClient(
+                    context,
+                    json.serverUri,
+                    "${json.clientId}_${System.currentTimeMillis()}"
+            )
+            return with(
+                    MqttClientHelper(mqttAndroidClient, json.mqttConnectOptions))
+            {
+                json.mqttSignalEntryList.forEach {
+                    addNewSignalEntry(it)
+                }
+                this
+            }
+        }
+    }
+
     val mqttEntries = arrayListOf<MqttSignalEntry>()
+
+    fun toJson(): MqttClientHelperJson {
+        return MqttClientHelperJson(
+                this.mqttAndroidClient.serverURI,
+                this.mqttAndroidClient.clientId,
+                this.mqttConnectOptions,
+                this.mqttEntries
+        )
+    }
+
 
     fun addNewSignalEntry(signal: MqttSignalEntry) {
         mqttEntries.add(signal)

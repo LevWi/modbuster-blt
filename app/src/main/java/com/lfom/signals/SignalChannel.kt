@@ -1,11 +1,13 @@
 package com.lfom.signals
 
+import com.squareup.moshi.Json
 
-/**
- * Created by gener on 08.01.2018.
- */
 
-data class SignalChannel(val idx: Int, val options: IPayloadCreator) : IPublishing, IArriving {
+
+data class SignalChannel(
+        val idx: Int = 0,
+        val options: PayloadOptions
+) : IPublishing, IArriving {
 
     @Transient
     var payload: SignalPayload? = null
@@ -13,6 +15,7 @@ data class SignalChannel(val idx: Int, val options: IPayloadCreator) : IPublishi
 
     var name: String = ""
 
+    @Json(name = "refresh_when_publish")
     var refreshDataWhenPublish = false
 
     @Transient
@@ -27,7 +30,10 @@ data class SignalChannel(val idx: Int, val options: IPayloadCreator) : IPublishi
     @Transient
     var timePoint : Long = 0
 
-    val arrivingDataEventManager = ArrivingDataEventManager()
+    @Json(name = "receivers")
+    var arrivingDataEventManager = ArrivingDataEventManager()
+
+    var UIvisible : Boolean = true
 
     fun notifyListeners(data: SignalPayload) {
         arrivingDataEventManager.notifyListeners(data, this)

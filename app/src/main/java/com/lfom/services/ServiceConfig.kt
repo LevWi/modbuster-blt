@@ -6,5 +6,5 @@ import com.squareup.moshi.Json
 
 class ServiceConfig(
         val signals: MutableMap<Int, SignalChannel> = mutableMapOf(),
-        @Json(name = "mqtt_connections") val mqttClients: MutableList<MqttClientHelper> = arrayListOf()
+        @Json(name = "mqtt") val mqttClients: List<MqttClientHelperJson> = arrayListOf()
 )

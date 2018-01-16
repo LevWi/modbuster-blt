@@ -5,10 +5,10 @@ import com.squareup.moshi.Json
 
 class ArrivingDataEventManager {
 
-    @Json(name = "receivers") val listnersIds = arrayListOf<Int>()
+    @Json(name = "ids") var listnersIds : MutableList<Int> = mutableListOf()
 
     @Transient
-    private val mListeners = arrayListOf<IArriving>()
+    private val mListeners = mutableListOf<IArriving>()
 
     fun subscribe(listener: IArriving) {
         mListeners.firstOrNull({ it === listener }) ?: mListeners.add(listener)
