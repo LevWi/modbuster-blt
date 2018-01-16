@@ -12,6 +12,8 @@ import com.squareup.moshi.KotlinJsonAdapterFactory
 import com.squareup.moshi.Moshi
 import org.eclipse.paho.android.service.MqttAndroidClient
 import org.eclipse.paho.client.mqttv3.*
+import java.io.FileNotFoundException
+import java.io.IOException
 import java.util.concurrent.ConcurrentHashMap
 
 
@@ -43,7 +45,7 @@ class SignalsDataService : Service() {
 
     val signals: MutableMap<Int, SignalChannel> = ConcurrentHashMap()
 
-    val mqttClients = arrayListOf<MqttClientHelper>()
+    val mqttClients = mutableListOf<MqttClientHelper>()
 
     inner class SigDataServiceBinder : Binder() {
         val service: SignalsDataService
@@ -54,9 +56,52 @@ class SignalsDataService : Service() {
         return mSigDataServiceBinder
     }
 
-    private val serverUri = "tcp://192.168.10.11:1883"
+
+    fun loadConfig() {
+        //Log.i(MAIN_DATA_SERVICE_TAG, "Numbers of elements ${mqttClients.size}")
+        status = StatusService.READ_CONFIG
+        try {
+            val jsonString: String = openFileInput("default.prj").use {
+                it.bufferedReader().readText()
+            }
+
+            val moshi = Moshi.Builder()
+                    .add(KotlinJsonAdapterFactory())
+                    //.add(MqttAndroidClientJsonAdapter(applicationContext))
+                    .add(MqttConnectOptionsJsonAdapter())
+                    .build()
+
+            val adapter = moshi.adapter(ServiceConfig::class.java)
+
+            val testConfig = adapter.fromJson(jsonString)
+
+            testConfig?.let {
+                signals.putAll(it.signals)
+                this.mqttClients.clear()
+                it.mqttClients.forEach {
+                    this.mqttClients.add(
+                            MqttClientHelper.create(applicationContext, it)
+                    )
+                }
+                Log.i(MAIN_DATA_SERVICE_TAG, "Config loaded")
+            }
+
+        } catch (ex: FileNotFoundException) {
+            Log.e(MAIN_DATA_SERVICE_TAG, "File default.prj not found")
+            status = StatusService.CONFIG_NOT_FOUND
+        } catch (ex: IOException) {
+            Log.e(MAIN_DATA_SERVICE_TAG, "Error when reading config", ex)
+            status = StatusService.ERROR_CONFIG
+        }
+    }
+
+    fun createLinks() {
+
+    }
 
     fun startWork() {
+
+        val serverUri = "tcp://192.168.10.11:1883"
 
         val clientId = "ExampleAndroidClient" + System.currentTimeMillis()
         val mqttConnectOptions = MqttConnectOptions()
@@ -121,10 +166,12 @@ class SignalsDataService : Service() {
     }
 }
 
-enum class StatusService(code : Int) {
+enum class StatusService(code: Int) {
+    CONFIG_NOT_FOUND(-2),
     ERROR_CONFIG(-1),
     NOT_READY(0),
-    READ_CONFIG(1),
-    READY(2),
+    BUSY(1),
+    READ_CONFIG(2),
+    READY_TO_START(3),
     WORKING(3)
 }
