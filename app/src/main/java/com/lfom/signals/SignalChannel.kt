@@ -4,7 +4,7 @@ import com.squareup.moshi.Json
 
 
 
-data class SignalChannel(
+class SignalChannel(
         val idx: Int = 0,
         val options: PayloadOptions
 ) : IPublishing, IArriving {
@@ -26,6 +26,15 @@ data class SignalChannel(
 
     @Transient
     var publishListener: IPublishing? = null
+
+
+    var route : RouteChannel = RouteChannel.IN_OUT
+
+    /**
+     *  0 - публикация идет по привязанному каналу Arrived.
+     */
+    @Json(name = "publish_receiver_id")
+    var publishListenerId : Int = 0
 
     @Transient
     var timePoint : Long = 0
@@ -78,6 +87,12 @@ data class SignalChannel(
             is BadData -> payload = data.copy()
         }
     }
+}
+
+enum class RouteChannel{
+    IN,
+    OUT,
+    IN_OUT,
 }
 
 /**

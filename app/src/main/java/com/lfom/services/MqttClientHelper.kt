@@ -3,6 +3,7 @@ package com.lfom.services
 import android.content.Context
 import android.util.Log
 import com.lfom.signals.*
+import com.squareup.moshi.Json
 import org.eclipse.paho.android.service.MqttAndroidClient
 import org.eclipse.paho.client.mqttv3.*
 
@@ -12,9 +13,9 @@ import org.eclipse.paho.client.mqttv3.*
 class MqttClientHelper(val mqttAndroidClient: MqttAndroidClient,
                        val mqttConnectOptions: MqttConnectOptions) {
 
-    class MqttSignalEntry(val topicGeneral: String,
-                          val topicForPublish: String? = "",
-                          val idxReceiver: Int = 0
+    class MqttSignalEntry(@Json(name = "topic") val topicGeneral: String,
+                          @Json(name = "publish_topic") val topicForPublish: String? = "",
+                          @Json(name = "receiver_id") val idxReceiver: Int = 0
     ) : IPublishing {
 
         var qos: Int = 0

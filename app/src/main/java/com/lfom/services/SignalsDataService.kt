@@ -38,6 +38,9 @@ class SignalsDataService : Service() {
 
      */
 
+    var status = StatusService.NOT_READY
+        private set
+
     val signals: MutableMap<Int, SignalChannel> = ConcurrentHashMap()
 
     val mqttClients = arrayListOf<MqttClientHelper>()
@@ -118,3 +121,10 @@ class SignalsDataService : Service() {
     }
 }
 
+enum class StatusService(code : Int) {
+    ERROR_CONFIG(-1),
+    NOT_READY(0),
+    READ_CONFIG(1),
+    READY(2),
+    WORKING(3)
+}
