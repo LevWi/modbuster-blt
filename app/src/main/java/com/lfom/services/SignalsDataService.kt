@@ -17,34 +17,17 @@ import java.io.IOException
 import java.util.concurrent.ConcurrentHashMap
 
 
-/**
- * Created by gener on 03.01.2018.
- */
-
 
 class SignalsDataService : Service() {
 
     private val mSigDataServiceBinder = SigDataServiceBinder()
 
-    /*TODO
-    + проверка на уникальность Id сигнала
-
-     TODO
-     Если новое значение сигнала приходит от сервера
-     - стандартное действие  , уведомляем подписанных приемников
-     Пишем значение сами
-     - другое действие, уведомляем подписанных приемников
-
-
-     TODO Загрузка файла конфигурации
-
-     */
 
     var status = StatusService.NOT_READY
         private set
 
 
-    val groups: MutableList<GroupSignals> = arrayListOf()
+    val groups = mutableSetOf<GroupSignals>()
     val signals: MutableMap<Int, SignalChannel> = ConcurrentHashMap()
     val mqttClients = mutableListOf<MqttClientHelper>()
 
@@ -61,7 +44,7 @@ class SignalsDataService : Service() {
 
 
     fun loadConfig() {
-        //Log.i(MAIN_DATA_SERVICE_TAG, "Numbers of elements ${mqttClients.size}")
+
         status = StatusService.READ_CONFIG
         try {
             val jsonString: String = openFileInput("default.prj").use {
@@ -86,6 +69,7 @@ class SignalsDataService : Service() {
                             MqttClientHelper.create(applicationContext, it)
                     )
                 }
+                this.groups.addAll(it.groups)
                 Log.i(MAIN_DATA_SERVICE_TAG, "Config loaded")
             }
 
@@ -98,11 +82,21 @@ class SignalsDataService : Service() {
         }
     }
 
+    /**
+     * Создание зависимостей между экземплярами MqttClientHelper и signals
+     */
     fun createLinks() {
+        //TODO Пробег по mqttClients.
+        // Найти receiver_id == idx сигнала -> Связываем
+        //Если publish_receiver_id == 0 -> Привязываем их и в обратную сторону
 
+        //TODO Пробег по signals
+        //Если publish_receiver_id == 0 -> Привязываем их и в обратную сторону
+        // Иначе ищем id среди signals и связываем
+        // Игнорировать индексы приемников равные их индексам
     }
 
-    fun startWork() {
+    /*fun startWork() {
 
         val serverUri = "tcp://192.168.10.11:1883"
 
@@ -147,9 +141,9 @@ class SignalsDataService : Service() {
                 }
         )
         //client.connect()
-    }
+    }*/
 
-    fun generateJsonFile() {
+    /*fun generateJsonFile() {
         val moshi = Moshi.Builder()
                 .add(KotlinJsonAdapterFactory())
                 //.add(MqttAndroidClientJsonAdapter(applicationContext))
@@ -174,7 +168,7 @@ class SignalsDataService : Service() {
         val outFileStream = openFileOutput("default.prj", Context.MODE_PRIVATE)
         outFileStream.use { it.write(str.toByteArray()) }
 
-    }
+    }*/
 }
 
 enum class StatusService(code: Int) {

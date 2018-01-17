@@ -24,7 +24,7 @@ class TestServiceActivity : AppCompatActivity() {
 
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
             boundService = (service as? SignalsDataService.SigDataServiceBinder)?.service
-            boundService?.startWork()
+            //boundService?.startWork()
             /*val signal = boundService?.signals?.get(33)
             signal?.arrivingDataEventManager!!.subscribe(object : IArriving {
                 override fun onNewPayload(data: SignalPayload, sender: IArriving?) {
@@ -63,7 +63,7 @@ class TestServiceActivity : AppCompatActivity() {
     }
 
     fun onGenerateJson(view: View){
-        boundService?.generateJsonFile()
+       // boundService?.generateJsonFile()
     }
 
     fun onReadJson(view: View){
