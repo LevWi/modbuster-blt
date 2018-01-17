@@ -43,9 +43,12 @@ class SignalsDataService : Service() {
     var status = StatusService.NOT_READY
         private set
 
-    val signals: MutableMap<Int, SignalChannel> = ConcurrentHashMap()
 
+    val groups: MutableList<GroupSignals> = arrayListOf()
+    val signals: MutableMap<Int, SignalChannel> = ConcurrentHashMap()
     val mqttClients = mutableListOf<MqttClientHelper>()
+
+
 
     inner class SigDataServiceBinder : Binder() {
         val service: SignalsDataService
@@ -71,7 +74,7 @@ class SignalsDataService : Service() {
                     .add(MqttConnectOptionsJsonAdapter())
                     .build()
 
-            val adapter = moshi.adapter(ServiceConfig::class.java)
+            val adapter = moshi.adapter(ServiceConfigJson::class.java)
 
             val testConfig = adapter.fromJson(jsonString)
 
@@ -136,6 +139,13 @@ class SignalsDataService : Service() {
         )
 
         mqttClients.add(client)
+
+        groups.add(
+                GroupSignals(2).also {
+                    it.name = "Test Group"
+                    it.signals = mutableSetOf(1,2,3)
+                }
+        )
         //client.connect()
     }
 
@@ -146,9 +156,10 @@ class SignalsDataService : Service() {
                 .add(MqttConnectOptionsJsonAdapter())
                 .build()
 
-        val adapter = moshi.adapter(ServiceConfig::class.java)
+        val adapter = moshi.adapter(ServiceConfigJson::class.java)
 
-        val testConfig = ServiceConfig(
+        val testConfig = ServiceConfigJson(
+                groups,
                 signals,
                 mqttClients.map { it.toJson() }
         )
@@ -161,7 +172,7 @@ class SignalsDataService : Service() {
         //val str = adapter.toJson(config).toByteArray()
 
         val outFileStream = openFileOutput("default.prj", Context.MODE_PRIVATE)
-        outFileStream.use { out -> out.write(str.toByteArray()) }
+        outFileStream.use { it.write(str.toByteArray()) }
 
     }
 }
