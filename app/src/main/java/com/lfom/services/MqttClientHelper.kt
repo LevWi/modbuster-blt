@@ -86,7 +86,6 @@ class MqttClientHelper(val mqttAndroidClient: MqttAndroidClient,
 
         mqttAndroidClient.setCallback(object : MqttCallbackExtended {
             override fun connectComplete(reconnect: Boolean, serverURI: String) {
-
                 if (reconnect) {
                     Log.i(MAIN_DATA_SERVICE_TAG, "Reconnected to : " + serverURI)
                     // Because Clean Session is true, we need to re-subscribe
@@ -97,6 +96,10 @@ class MqttClientHelper(val mqttAndroidClient: MqttAndroidClient,
             }
 
             override fun connectionLost(cause: Throwable) {
+                mqttEntries.forEach {
+                    it.receiver?.onNewPayload(
+                            BadData(BadData.LOST_CONNECT), null)
+                }
                 Log.w(MAIN_DATA_SERVICE_TAG, "The Connection was lost.")
             }
 
@@ -130,6 +133,10 @@ class MqttClientHelper(val mqttAndroidClient: MqttAndroidClient,
         } catch (ex: MqttException) {
             ex.printStackTrace()
         }
+    }
+
+    fun disconnect() {
+        mqttAndroidClient.disconnect()
     }
 
     private fun subscribeToTopic() {

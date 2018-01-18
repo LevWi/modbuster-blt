@@ -1,6 +1,6 @@
 package com.lfom.ui
 
-import kotlinx.android.synthetic.main.activity_test_service.*
+
 
 import android.content.ComponentName
 import android.content.Context

@@ -88,6 +88,7 @@ sealed class SignalPayload
 data class BadData(val message: String = "BAD") : SignalPayload() {
     companion object {
         const val CONVERSION_ERROR = "CONVERSION_ERROR"
+        const val LOST_CONNECT = "LOST_CONNECT"
     }
 }
 

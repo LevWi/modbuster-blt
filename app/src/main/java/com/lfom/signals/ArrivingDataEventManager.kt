@@ -8,10 +8,11 @@ class ArrivingDataEventManager {
     @Json(name = "ids") var listnersIds : MutableList<Int> = mutableListOf()
 
     @Transient
-    private val mListeners = mutableListOf<IArriving>()
+    private val mListeners = mutableSetOf<IArriving>()
 
     fun subscribe(listener: IArriving) {
-        mListeners.firstOrNull({ it === listener }) ?: mListeners.add(listener)
+        //mListeners.firstOrNull({ it === listener }) ?: mListeners.add(listener)
+        mListeners.add(listener)
     }
 
     fun unsubscribe(listener: IArriving) {

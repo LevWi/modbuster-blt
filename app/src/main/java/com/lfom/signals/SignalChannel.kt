@@ -5,7 +5,7 @@ import com.squareup.moshi.Json
 
 
 class SignalChannel(
-        val idx: Int = 0,
+        var idx: Int = 0,
         val options: PayloadOptions
 ) : IPublishing, IArriving {
 
