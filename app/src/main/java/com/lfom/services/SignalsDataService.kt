@@ -2,20 +2,18 @@ package com.lfom.services
 
 
 import android.app.Service
-import android.content.Context
 import android.content.Intent
 import android.os.Binder
 import android.os.Handler
 import android.os.IBinder
-import android.os.Looper
 import android.util.Log
 import android.widget.Toast
 import com.lfom.modbuster.R
-import com.lfom.signals.*
+import com.lfom.signals.SignalChannel
 import com.squareup.moshi.KotlinJsonAdapterFactory
 import com.squareup.moshi.Moshi
-import org.eclipse.paho.android.service.MqttAndroidClient
-import org.eclipse.paho.client.mqttv3.*
+import kotlinx.coroutines.experimental.async
+import kotlinx.coroutines.experimental.runBlocking
 import java.io.FileNotFoundException
 import java.io.IOException
 import java.util.concurrent.ConcurrentHashMap
@@ -26,7 +24,7 @@ class SignalsDataService : Service() {
     private val mSigDataServiceBinder = SigDataServiceBinder()
 
 
-    var status = StatusService.NOT_READY
+    var state = StatusService.NOT_READY
         private set
 
 
@@ -55,14 +53,12 @@ class SignalsDataService : Service() {
             Log.w(MAIN_DATA_SERVICE_TAG, string)
             showToastForUser(string)
         }
-
-        when (status) {
+        when (state) {
             StatusService.CONFIG_NOT_FOUND -> sendWarning(resources.getString(R.string.config_not_found))
             StatusService.ERROR_CONFIG -> sendWarning(resources.getString(R.string.error_read_config))
             StatusService.NOT_READY -> {
-                TODO(" Запуск в отдельном потоке Сервиса")
+                state = StatusService.READ_CONFIG
                 loadConfig()
-                Handler() ??
             }
             StatusService.READ_CONFIG -> return
             StatusService.READY_TO_START -> mqttClients.forEach { it.connect() }
@@ -78,14 +74,14 @@ class SignalsDataService : Service() {
 
     }
 
-    fun loadConfig() {
-
-        status = StatusService.READ_CONFIG
+    fun loadConfig() = runBlocking {
+        clearConfig()
         try {
-            val jsonString: String = openFileInput("default.prj").use {
-                it.bufferedReader().readText()
+            val jsonString = async {
+                openFileInput("default.prj").use {
+                    it.bufferedReader().readText()
+                }
             }
-
             val moshi = Moshi.Builder()
                     .add(KotlinJsonAdapterFactory())
                     //.add(MqttAndroidClientJsonAdapter(applicationContext))
@@ -94,17 +90,17 @@ class SignalsDataService : Service() {
 
             val adapter = moshi.adapter(ServiceConfigJson::class.java)
 
-            val testConfig = adapter.fromJson(jsonString)
+            val testConfig = adapter.fromJson(jsonString.await())
 
             testConfig?.let {
                 signals.putAll(it.signals)
-                this.mqttClients.clear()
+                this@SignalsDataService.mqttClients.clear()
                 it.mqttClients.forEach {
-                    this.mqttClients.add(
+                    this@SignalsDataService.mqttClients.add(
                             MqttClientHelper.create(applicationContext, it)
                     )
                 }
-                this.groups.addAll(it.groups)
+                this@SignalsDataService.groups.addAll(it.groups)
                 Log.i(MAIN_DATA_SERVICE_TAG, "Config loaded")
             }
 
@@ -112,10 +108,10 @@ class SignalsDataService : Service() {
 
         } catch (ex: FileNotFoundException) {
             Log.e(MAIN_DATA_SERVICE_TAG, "File default.prj not found")
-            status = StatusService.CONFIG_NOT_FOUND
+            state = StatusService.CONFIG_NOT_FOUND
         } catch (ex: IOException) {
             Log.e(MAIN_DATA_SERVICE_TAG, "Error when reading config", ex)
-            status = StatusService.ERROR_CONFIG
+            state = StatusService.ERROR_CONFIG
         }
     }
 
@@ -123,7 +119,7 @@ class SignalsDataService : Service() {
      * Создание зависимостей между экземплярами MqttClientHelper и signals
      */
     private fun createLinks() {
-        //TODO Пробег по mqttClients.
+        //Пробег по mqttClients.
         // Найти receiver_id == idx сигнала -> Связываем
         //Если publish_receiver_id == 0 -> Привязываем их и в обратную сторону, если не занят
 
@@ -139,7 +135,7 @@ class SignalsDataService : Service() {
             }
         }
 
-        //TODO Пробег по signals
+        //Пробег по signals
         //Если publish_receiver_id == 0 -> Привязываем их и в обратную сторону
         // Иначе ищем id среди signals и связываем
         // Игнорировать индексы приемников равные их индексам
@@ -168,89 +164,15 @@ class SignalsDataService : Service() {
             }
         }
 
-        status = StatusService.READY_TO_START
+        state = StatusService.READY_TO_START
     }
 
     fun clearConfig() {
-        if (status = StatusService.WORKING)
-            groups.clear()
+        groups.clear()
         signals.clear()
-
+        mqttClients.clear()
     }
 
-/*fun startWork() {
-
-    val serverUri = "tcp://192.168.10.11:1883"
-
-    val clientId = "ExampleAndroidClient" + System.currentTimeMillis()
-    val mqttConnectOptions = MqttConnectOptions()
-    mqttConnectOptions.isAutomaticReconnect = true
-    mqttConnectOptions.isCleanSession = false
-
-    val mqttAndroidClient = MqttAndroidClient(applicationContext, serverUri, clientId)
-
-    val newSignal = SignalChannel(
-            33,
-            IntOptions()
-    ).also {
-        it.name = "WB_Rele_1"
-        it.arrivedCallback = { data, _, _ ->
-            val string = (data as? IConvertible)?.asString(null)
-            Log.d(MAIN_DATA_SERVICE_TAG, "Received signal ${it.name} = $string")
-        }
-        it.arrivingDataEventManager.listnersIds.add(44)
-        it.arrivingDataEventManager.listnersIds.add(55)
-    }
-    signals.put(newSignal.idx, newSignal)
-
-    val client = MqttClientHelper(mqttAndroidClient, mqttConnectOptions)
-
-    client.addNewSignalEntry(
-            MqttClientHelper.MqttSignalEntry("/devices/wb-gpio/controls/Relay_1",
-                    "/devices/wb-gpio/controls/Relay_1/on"
-            ).also {
-                it.receiver = newSignal
-                newSignal.publishListener = it
-            }
-    )
-
-    mqttClients.add(client)
-
-    groups.add(
-            GroupSignals(2).also {
-                it.name = "Test Group"
-                it.signals = mutableSetOf(1,2,3)
-            }
-    )
-    //client.connect()
-}*/
-
-/*fun generateJsonFile() {
-    val moshi = Moshi.Builder()
-            .add(KotlinJsonAdapterFactory())
-            //.add(MqttAndroidClientJsonAdapter(applicationContext))
-            .add(MqttConnectOptionsJsonAdapter())
-            .build()
-
-    val adapter = moshi.adapter(ServiceConfigJson::class.java)
-
-    val testConfig = ServiceConfigJson(
-            groups,
-            signals,
-            mqttClients.map { it.toJson() }
-    )
-
-    val str = adapter.toJson(testConfig)
-
-
-    //val config = ServiceConfig(signals, mqttClients)
-
-    //val str = adapter.toJson(config).toByteArray()
-
-    val outFileStream = openFileOutput("default.prj", Context.MODE_PRIVATE)
-    outFileStream.use { it.write(str.toByteArray()) }
-
-}*/
 }
 
 enum class StatusService(code: Int) {
