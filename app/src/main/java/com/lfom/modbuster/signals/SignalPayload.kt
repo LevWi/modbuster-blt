@@ -1,9 +1,4 @@
-package com.lfom.signals
-
-import com.squareup.moshi.JsonQualifier
-import com.squareup.moshi.ToJson
-import com.squareup.moshi.FromJson
-
+package com.lfom.modbuster.signals
 
 
 /**

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lfom.ui.barcode;
+package com.lfom.modbuster.ui.barcode;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
@@ -47,8 +47,8 @@ import com.google.android.gms.vision.CameraSource;
 import com.google.android.gms.vision.MultiProcessor;
 import com.google.android.gms.vision.barcode.Barcode;
 import com.google.android.gms.vision.barcode.BarcodeDetector;
-import com.lfom.ui.camera.CameraSourcePreview;
-import com.lfom.ui.camera.GraphicOverlay;
+import com.lfom.modbuster.ui.camera.CameraSourcePreview;
+import com.lfom.modbuster.ui.camera.GraphicOverlay;
 
 import java.io.IOException;
 

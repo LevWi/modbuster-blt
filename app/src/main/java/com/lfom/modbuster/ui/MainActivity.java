@@ -1,9 +1,9 @@
-package com.lfom.ui;
+package com.lfom.modbuster.ui;
+
 
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
@@ -14,7 +14,7 @@ import android.widget.TextView;
 import com.google.android.gms.common.api.CommonStatusCodes;
 import com.google.android.gms.vision.barcode.Barcode;
 import com.lfom.modbuster.R;
-import com.lfom.ui.barcode.BarcodeCaptureActivity;
+import com.lfom.modbuster.ui.barcode.BarcodeCaptureActivity;
 
 import org.eclipse.paho.android.service.MqttAndroidClient;
 import org.eclipse.paho.client.mqttv3.DisconnectedBufferOptions;

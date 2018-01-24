@@ -8,16 +8,16 @@
     android:layout_height="match_parent"
     android:keepScreenOn="true">
 
-  <com.lfom.ui.camera.CameraSourcePreview
+  <com.lfom.modbuster.ui.camera.CameraSourcePreview
       android:id="@+id/preview"
       android:layout_width="match_parent"
       android:layout_height="match_parent">
 
-    <com.lfom.ui.camera.GraphicOverlay
+    <com.lfom.modbuster.ui.camera.GraphicOverlay
         android:id="@+id/graphicOverlay"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
-  </com.lfom.ui.camera.CameraSourcePreview>
+  </com.lfom.modbuster.ui.camera.CameraSourcePreview>
 
 </LinearLayout>

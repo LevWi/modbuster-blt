@@ -22,18 +22,13 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name="com.lfom.ui.TestServiceActivity">
+        <activity android:name="com.lfom.modbuster.ui.TestServiceActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="com.lfom.ui.MainActivity">
-        </activity>
-        <activity
-            android:name="com.lfom.ui.barcode.BarcodeCaptureActivity"
-            android:label="Read Barcode" />
-
+        <activity android:name="com.lfom.modbuster.ui.ConfigFileFinder" />
         <meta-data
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
@@ -42,10 +37,10 @@
             android:value="barcode" />
 
         <!-- Services -->
-        <service android:name="com.lfom.services.SignalsDataService" />
+        <service android:name="com.lfom.modbuster.services.SignalsDataService" />
         <service android:name="org.eclipse.paho.android.service.MqttService" />
 
-        <activity android:name="com.lfom.ui.ConfigFileFinder" />
+
     </application>
 
 </manifest>

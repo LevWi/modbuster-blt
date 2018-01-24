@@ -1,4 +1,4 @@
-package com.lfom.ui
+package com.lfom.modbuster.ui
 
 
 
@@ -11,10 +11,9 @@ import com.lfom.modbuster.R
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.os.IBinder
-import android.util.Log
 import android.view.View
-import com.lfom.services.SignalsDataService
-import com.lfom.signals.*
+import com.lfom.modbuster.services.SignalsDataService
+import com.lfom.modbuster.signals.*
 
 class TestServiceActivity : AppCompatActivity() , SignalsDataServiceConnection {
 

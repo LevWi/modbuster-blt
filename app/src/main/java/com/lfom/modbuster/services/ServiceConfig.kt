@@ -1,6 +1,6 @@
-package com.lfom.services
+package com.lfom.modbuster.services
 
-import com.lfom.signals.SignalChannel
+import com.lfom.modbuster.signals.SignalChannel
 import com.squareup.moshi.Json
 
 

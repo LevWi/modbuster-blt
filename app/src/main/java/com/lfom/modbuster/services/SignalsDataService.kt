@@ -1,4 +1,4 @@
-package com.lfom.services
+package com.lfom.modbuster.services
 
 
 import android.app.Service
@@ -10,7 +10,7 @@ import android.util.Log
 import android.widget.Toast
 
 import com.lfom.modbuster.R
-import com.lfom.signals.SignalChannel
+import com.lfom.modbuster.signals.SignalChannel
 
 import com.squareup.moshi.KotlinJsonAdapterFactory
 import com.squareup.moshi.Moshi

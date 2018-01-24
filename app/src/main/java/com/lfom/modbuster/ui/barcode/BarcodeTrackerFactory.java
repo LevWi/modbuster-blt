@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.lfom.ui.barcode;
+package com.lfom.modbuster.ui.barcode;
 
 import android.content.Context;
 
-import com.lfom.ui.camera.GraphicOverlay;
+import com.lfom.modbuster.ui.camera.GraphicOverlay;
 import com.google.android.gms.vision.MultiProcessor;
 import com.google.android.gms.vision.Tracker;
 import com.google.android.gms.vision.barcode.Barcode;

@@ -2,7 +2,7 @@ package com.lfom.modbuster
 
 //import com.google.gson.Gson
 //import com.google.gson.GsonBuilder
-import com.lfom.services.GroupSignals
+import com.lfom.modbuster.services.GroupSignals
 
 import org.junit.Test
 

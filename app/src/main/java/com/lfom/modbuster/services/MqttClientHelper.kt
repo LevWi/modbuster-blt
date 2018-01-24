@@ -1,8 +1,8 @@
-package com.lfom.services
+package com.lfom.modbuster.services
 
 import android.content.Context
 import android.util.Log
-import com.lfom.signals.*
+import com.lfom.modbuster.signals.*
 import com.squareup.moshi.Json
 import org.eclipse.paho.android.service.MqttAndroidClient
 import org.eclipse.paho.client.mqttv3.*

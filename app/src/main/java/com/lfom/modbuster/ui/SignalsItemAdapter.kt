@@ -1,4 +1,4 @@
-package com.lfom.ui
+package com.lfom.modbuster.ui
 
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
@@ -7,7 +7,7 @@ import android.view.ViewGroup
 import android.widget.TextView
 
 import com.lfom.modbuster.R
-import com.lfom.services.SignalsDataService
+import com.lfom.modbuster.services.SignalsDataService
 
 // TODO есть ли возможность иссползовать? import kotlinx.android.synthetic.main.group_signals_card.*
 

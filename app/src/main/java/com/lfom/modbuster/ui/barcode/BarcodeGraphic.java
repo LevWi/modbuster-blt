@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package com.lfom.ui.barcode;
+package com.lfom.modbuster.ui.barcode;
 
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.RectF;
 
-import com.lfom.ui.camera.GraphicOverlay;
+import com.lfom.modbuster.ui.camera.GraphicOverlay;
 import com.google.android.gms.vision.barcode.Barcode;
 
 /**

@@ -1,4 +1,4 @@
-package com.lfom.services
+package com.lfom.modbuster.services
 
 
 import com.squareup.moshi.FromJson

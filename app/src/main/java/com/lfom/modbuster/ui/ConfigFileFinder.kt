@@ -1,4 +1,4 @@
-package com.lfom.ui
+package com.lfom.modbuster.ui
 
 import android.app.Activity
 import android.content.Context
