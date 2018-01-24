@@ -16,9 +16,9 @@ import android.view.View
 import com.lfom.services.SignalsDataService
 import com.lfom.signals.*
 
-class TestServiceActivity : AppCompatActivity() {
+class TestServiceActivity : AppCompatActivity() , SignalsDataServiceConnection {
 
-    var boundService: SignalsDataService? = null
+    private var boundService: SignalsDataService? = null
 
     val serviceConnection = object : ServiceConnection {
 
@@ -69,4 +69,9 @@ class TestServiceActivity : AppCompatActivity() {
     fun onReadJson(view: View){
         boundService?.loadConfig()
     }
+
+    override val service: SignalsDataService?
+        get() = boundService
+
 }
+

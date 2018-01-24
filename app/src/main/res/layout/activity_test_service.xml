@@ -32,22 +32,11 @@
         android:id="@+id/textView2"
         android:layout_width="149dp"
         android:layout_height="145dp"
-        android:layout_marginEnd="44dp"
-        android:layout_marginTop="84dp"
+        android:layout_marginEnd="56dp"
+        android:layout_marginTop="16dp"
         android:text="TextView"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
-
-    <Button
-        android:id="@+id/button5"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="48dp"
-        android:layout_marginTop="60dp"
-        android:text="Generate"
-        android:onClick="onGenerateJson"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/button_releON" />
 
     <Button
         android:id="@+id/button6"
@@ -58,5 +47,5 @@
         android:onClick="onReadJson"
         android:text="Read"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/button5" />
+        app:layout_constraintTop_toBottomOf="@+id/button_releON" />
 </android.support.constraint.ConstraintLayout>
