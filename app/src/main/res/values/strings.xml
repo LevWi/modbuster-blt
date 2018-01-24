@@ -16,4 +16,15 @@
 
     <string name="error_read_config">"Error reading configuration&#8230; Check it"</string>
     <string name="config_not_found">"Configuration not found&#8230;"</string>
+
+
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+
+    <string name="action_settings">Settings</string>
+
+
+
+
+
 </resources>
