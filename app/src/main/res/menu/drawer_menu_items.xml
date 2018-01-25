@@ -1,40 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
-
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/nav_menu_start_work"
+        android:icon="@drawable/ic_play_arrow_black_24dp"
+        android:title="@string/start"/>
     <group android:checkableBehavior="single">
         <item
-            android:id="@+id/nav_camera"
-            android:icon="@drawable/ic_menu_camera"
-            android:title="Import" />
+            android:id="@+id/nav_menu_connections"
+            android:icon="@drawable/ic_cloud_queue_black_24dp"
+            android:title="@string/connections" />
         <item
-            android:id="@+id/nav_gallery"
-            android:icon="@drawable/ic_menu_gallery"
-            android:title="Gallery" />
-        <item
-            android:id="@+id/nav_slideshow"
-            android:icon="@drawable/ic_menu_slideshow"
-            android:title="Slideshow" />
-        <item
-            android:id="@+id/nav_manage"
+            android:id="@+id/nav_menu_settings"
             android:icon="@drawable/ic_menu_manage"
-            android:title="Tools" />
+            android:title="@string/settings" />
     </group>
 
-
-
-
-
-    <item android:title="Communicate">
-        <menu>
+    <item android:title="@string/configuration">
+        <menu >
             <item
-                android:id="@+id/nav_share"
-                android:icon="@drawable/ic_menu_share"
-                android:title="Share" />
+                android:id="@+id/nav_menu_auto_start"
+                android:title="@string/auto_start"/>
             <item
-                android:id="@+id/nav_send"
-                android:icon="@drawable/ic_menu_send"
-                android:title="Send" />
+                android:id="@+id/nav_menu_load_conf"
+                android:icon="@drawable/ic_file_download_black_24dp"
+                android:title="@string/load_conf" />
         </menu>
     </item>
-
 </menu>

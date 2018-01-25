@@ -33,23 +33,15 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 tools:text="Имя группы"
-                android:background="@color/colorGroup"
 
                 />
-            <TextView
-                android:id="@+id/test"
-                style="@style/Base.TextAppearance.AppCompat.Medium"
-                android:textAlignment="center"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                tools:text="Тест"
-                />
-            <LinearLayout
+            <ListView
                 android:id="@+id/signals_linear_layout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical">
-            </LinearLayout>
+                android:orientation="vertical"
+                tools:listitem="@layout/signal_card">
+            </ListView>
         </LinearLayout>
     </android.support.v7.widget.CardView>
 

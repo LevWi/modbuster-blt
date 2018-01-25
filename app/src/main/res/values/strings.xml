@@ -22,9 +22,12 @@
     <string name="navigation_drawer_close">Close navigation drawer</string>
 
     <string name="action_settings">Settings</string>
-
-
-
+    <string name="settings">Настройки</string>
+    <string name="load_conf">Импорт</string>
+    <string name="configuration">Конфигурация</string>
+    <string name="auto_start">Автозапуск</string>
+    <string name="connections">Подключения</string>
+    <string name="start">Старт</string>
 
 
 </resources>
