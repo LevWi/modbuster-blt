@@ -1,6 +1,13 @@
 package com.lfom.modbuster.ui
 
+import android.app.Activity
+import android.content.ComponentName
+import android.content.Context
+import android.content.Intent
+import android.content.ServiceConnection
+import android.graphics.Color
 import android.os.Bundle
+import android.os.IBinder
 import android.support.design.widget.FloatingActionButton
 import android.support.design.widget.NavigationView
 import android.support.design.widget.Snackbar
@@ -10,14 +17,34 @@ import android.support.v7.app.ActionBarDrawerToggle
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.SwitchCompat
 import android.support.v7.widget.Toolbar
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 
 import com.lfom.modbuster.R
+import com.lfom.modbuster.services.SignalsDataService
 
+
+private const val TAG = "DrawerStartActivity"
+const val RESULT_CODE_FIND_FILE: Int = 10
 
 class DrawerStartActivity : AppCompatActivity(),
         NavigationView.OnNavigationItemSelectedListener {
+
+
+    private var boundService: SignalsDataService? = null
+
+    val serviceConnection = object : ServiceConnection {
+
+        override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
+            boundService = (service as? SignalsDataService.SigDataServiceBinder)?.service
+        }
+
+        override fun onServiceDisconnected(name: ComponentName?) {
+            boundService = null
+        }
+    }
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -36,6 +63,7 @@ class DrawerStartActivity : AppCompatActivity(),
         }
 
         val drawer = findViewById<DrawerLayout>(R.id.drawer_layout)
+
         val toggle = ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close)
 
@@ -47,11 +75,21 @@ class DrawerStartActivity : AppCompatActivity(),
         //TODO
         navigationView.menu
                 .findItem(R.id.nav_menu_auto_start)
-                .also {
-                    it.actionView = SwitchCompat(this)
-                }
+                .actionView = SwitchCompat(this).also {
+            it.setOnCheckedChangeListener { buttonView, isChecked ->
+                Snackbar.make(findViewById(R.id.main_content), "Not Implemented", Snackbar.LENGTH_INDEFINITE)
+                        .show()
+            }
+        }
 
         navigationView.setNavigationItemSelectedListener(this)
+
+    }
+
+    override fun onStart() {
+        super.onStart()
+        val intent = Intent(this, SignalsDataService::class.java)
+        bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE)
     }
 
     override fun onBackPressed() {
@@ -74,8 +112,31 @@ class DrawerStartActivity : AppCompatActivity(),
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
         // Handle navigation view item clicks here.
-        val id = item.itemId
+        when (item.itemId) {
+            R.id.nav_menu_load_conf -> {
 
+                val intent = Intent(Intent.ACTION_GET_CONTENT)
+                intent.type = "*/*"
+                intent.addCategory(Intent.CATEGORY_OPENABLE)
+                startActivityForResult(intent, RESULT_CODE_FIND_FILE)
+            }
+            R.id.nav_menu_start_work -> {
+                Snackbar.make(findViewById(R.id.main_content), "Not Implemented Запуск работы", Snackbar.LENGTH_LONG)
+                        .setActionTextColor(Color.RED)
+                        .show()
+            }
+            R.id.nav_menu_connections -> {
+                Snackbar.make(findViewById(R.id.main_content), "Not Implemented", Snackbar.LENGTH_LONG)
+                        .setActionTextColor(Color.GREEN)
+                        .show()
+            }
+            R.id.nav_menu_settings -> {
+                Snackbar.make(findViewById(R.id.main_content), "Not Implemented", Snackbar.LENGTH_LONG)
+                        .setActionTextColor(Color.MAGENTA)
+                        .show()
+            }
+
+        }
         /* if (id == R.id.nav_camera) {
             // Handle the camera action
         } else if (id == R.id.nav_gallery) {
@@ -94,4 +155,28 @@ class DrawerStartActivity : AppCompatActivity(),
         drawer.closeDrawer(GravityCompat.START)
         return true
     }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        if (requestCode == RESULT_CODE_FIND_FILE && resultCode == Activity.RESULT_OK) {
+            if (data == null) {
+                Log.w(TAG, "Empty Intent for file copy")
+                return
+            }
+            try {
+                val inpFileStream = baseContext.contentResolver.openInputStream(data.data)
+                val outFileStream = openFileOutput("default.prj", Context.MODE_PRIVATE)
+
+                inpFileStream.use { input ->
+                    outFileStream.use { output ->
+                        input.copyTo(output)
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, e.toString())
+            }
+        } else {
+            super.onActivityResult(requestCode, resultCode, data)
+        }
+    }
 }
+

@@ -51,26 +51,44 @@ class SignalsDataService : Service() {
         return super.onUnbind(intent)
     }
 
+    fun stopWork() {
+        if (state == StatusService.WORKING){
+
+        }
+    }
+
     fun startWork() {
 
         val sendWarning = { string: String ->
             Log.w(MAIN_DATA_SERVICE_TAG, string)
-            showToastForUser(string)
+            showFeedbackForUser(string)
         }
+
         when (state) {
             StatusService.CONFIG_NOT_FOUND -> sendWarning(resources.getString(R.string.config_not_found))
             StatusService.ERROR_CONFIG -> sendWarning(resources.getString(R.string.error_read_config))
             StatusService.NOT_READY -> {
                 state = StatusService.READ_CONFIG
-                loadConfig()
+                if( loadConfig() ) {
+                    startMqttClients()
+                }
             }
             StatusService.READ_CONFIG -> return
-            StatusService.READY_TO_START -> mqttClients.forEach { it.connect() }
+            StatusService.READY_TO_START -> startMqttClients()
             StatusService.WORKING -> return
         }
     }
 
-    fun showToastForUser(string: String) {
+
+    private fun startMqttClients()  {
+        mqttClients.forEach { it.connect() }
+    }
+
+    private fun stopMqttClients(){
+        mqttClients.forEach { it.disconnect() }
+    }
+
+    fun showFeedbackForUser(string: String) {
         Handler(mainLooper)
                 .post {
                     Toast.makeText(applicationContext, string, Toast.LENGTH_SHORT).show()
@@ -78,7 +96,7 @@ class SignalsDataService : Service() {
 
     }
 
-    fun loadConfig() = runBlocking {
+    fun loadConfig() = runBlocking<Boolean> {
         clearConfig()
         try {
             val jsonString = async {
@@ -109,13 +127,16 @@ class SignalsDataService : Service() {
             }
 
             createLinks()
+            false
 
         } catch (ex: FileNotFoundException) {
             Log.e(MAIN_DATA_SERVICE_TAG, "File default.prj not found")
             state = StatusService.CONFIG_NOT_FOUND
+            false
         } catch (ex: IOException) {
             Log.e(MAIN_DATA_SERVICE_TAG, "Error when reading config", ex)
             state = StatusService.ERROR_CONFIG
+            false
         }
     }
 
