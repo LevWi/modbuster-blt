@@ -5,6 +5,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ListView
 import android.widget.TextView
 
 import com.lfom.modbuster.R
@@ -16,11 +17,13 @@ const val TYPE_GROUP: Int = 5
 const val TYPE_SIGNAL: Int = 10
 private const val TAG = "SignalsItemAdapter"
 
+
+
 class SignalsItemAdapter(private val connection: SignalsDataServiceConnection) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup?, viewType: Int): RecyclerView.ViewHolder {
         //TODO
-        Log.w(TAG, "Call onCreateViewHolder() , viewType = $viewType ")
+        Log.d(TAG, "Call onCreateViewHolder() , viewType = $viewType ")
         return when (viewType) {
             TYPE_GROUP -> GroupSignalsViewHolder.create(parent!!)
             TYPE_SIGNAL -> SignalViewHolder.create(parent!!)
@@ -32,7 +35,7 @@ class SignalsItemAdapter(private val connection: SignalsDataServiceConnection) :
         val count = connection.service?.let {
             it.signals.size + it.groups.size
         } ?: 0
-        Log.w(TAG, "Call getItemCount() = $count")
+        Log.d(TAG, "Call getItemCount() = $count")
         return count
 
     }
@@ -42,6 +45,7 @@ class SignalsItemAdapter(private val connection: SignalsDataServiceConnection) :
         when (holder) {
             is GroupSignalsViewHolder -> {
                 holder.name.text = srv.groups.elementAt(position).name
+                holder.listOfSignals.addView()
             }
             is SignalViewHolder -> {
                 holder.name.text = srv.signals.values.elementAt(position - srv.groups.size).name
@@ -53,8 +57,8 @@ class SignalsItemAdapter(private val connection: SignalsDataServiceConnection) :
         //TODO
         Log.w(TAG, "Call getItemViewType() , $position ")
         val srv = connection.service ?: return -1
-        val tp  =  when {
-            position < srv.groups.size  -> TYPE_GROUP
+        val tp = when {
+            position < srv.groups.size -> TYPE_GROUP
             position < srv.groups.size + srv.signals.size -> TYPE_SIGNAL
             else -> -1
         }
@@ -62,6 +66,9 @@ class SignalsItemAdapter(private val connection: SignalsDataServiceConnection) :
         return tp
     }
 }
+
+
+
 
 
 class GroupSignalsViewHolder private constructor(view: View) : RecyclerView.ViewHolder(view) {
@@ -78,7 +85,8 @@ class GroupSignalsViewHolder private constructor(view: View) : RecyclerView.View
 
     val name: TextView = view.findViewById(R.id.group_name)
 
-    //TODO Реализовать дополнительные поля
+    val listOfSignals: ListView = view.findViewById(R.id.group_signals_listview)
+
 
 }
 
@@ -94,9 +102,10 @@ class SignalViewHolder private constructor(view: View) : RecyclerView.ViewHolder
     val view: View
         get() = super.itemView
 
-    val name: TextView = view.findViewById(R.id.signal_name)
+    val name: TextView = view.findViewById(R.id.card_signal_name)
 
-    //TODO Реализовать дополнительные поля
+    val data: TextView = view.findViewById(R.id.card_signal_data)
+
 
 }
 
