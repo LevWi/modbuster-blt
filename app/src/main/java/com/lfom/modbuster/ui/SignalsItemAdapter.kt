@@ -69,6 +69,14 @@ class SignalsItemAdapter(private val connection: SignalsDataServiceConnection) :
 
 
 
+internal fun SignalsDataService.getUIsignals(){
+    this.signals.mapKeys { it.value.UIvisible }
+}
+
+internal fun SignalsDataService.getUIsignalsCount() : Int {
+    TODO()
+    return this.signals.count { it.value.UIvisible }
+}
 
 
 class GroupSignalsViewHolder private constructor(view: View) : RecyclerView.ViewHolder(view) {

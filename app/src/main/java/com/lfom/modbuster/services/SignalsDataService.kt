@@ -159,6 +159,7 @@ class SignalsDataService : Service() {
             it.mqttEntries.forEach { topic ->
                 signals[topic.idxReceiver]?.let {
                     topic.receiver = it
+                    // TODO отработка IN_OUT ??
                     if (it.publishListenerId == 0 && it.publishListener == null) {
                         it.publishListener = topic
                     }
