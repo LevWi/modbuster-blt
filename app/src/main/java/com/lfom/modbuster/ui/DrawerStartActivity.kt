@@ -23,14 +23,19 @@ import android.view.MenuItem
 
 import com.lfom.modbuster.R
 import com.lfom.modbuster.services.SignalsDataService
+import com.lfom.modbuster.services.StatusService
+import kotlinx.coroutines.experimental.launch
 
 
 private const val TAG = "DrawerStartActivity"
 const val RESULT_CODE_FIND_FILE: Int = 10
 
 class DrawerStartActivity : AppCompatActivity(),
-        NavigationView.OnNavigationItemSelectedListener {
+        NavigationView.OnNavigationItemSelectedListener,
+        SignalsDataServiceConnection {
 
+
+    var listFragment: SignalsListFragment? = null
 
     private var boundService: SignalsDataService? = null
 
@@ -38,12 +43,31 @@ class DrawerStartActivity : AppCompatActivity(),
 
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
             boundService = (service as? SignalsDataService.SigDataServiceBinder)?.service
+
+            //TODO
+            addFragment()
         }
 
         override fun onServiceDisconnected(name: ComponentName?) {
             boundService = null
         }
     }
+
+
+    fun addFragment() {
+
+        if (listFragment == null) {
+            listFragment = SignalsListFragment()
+        }
+
+        val trs = fragmentManager.beginTransaction()
+        trs.add(R.id.content_fragment, listFragment)
+        trs.commit()
+    }
+
+
+    override val service: SignalsDataService?
+        get() = boundService
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -121,9 +145,25 @@ class DrawerStartActivity : AppCompatActivity(),
                 startActivityForResult(intent, RESULT_CODE_FIND_FILE)
             }
             R.id.nav_menu_start_work -> {
-                Snackbar.make(findViewById(R.id.main_content), "Not Implemented Запуск работы", Snackbar.LENGTH_LONG)
-                        .setActionTextColor(Color.RED)
-                        .show()
+                //TODO
+                val refrashData = {
+                    Log.w(TAG, "Refresh data")
+                    listFragment?.recyclerView?.adapter?.notifyDataSetChanged()
+                }
+
+
+                boundService?.let {
+                    if (it.state == StatusService.NOT_READY) {
+                        launch {
+                            it.loadConfig()
+                            runOnUiThread { refrashData() }
+                        }
+                    } else {
+                        refrashData()
+                    }
+                }
+
+
             }
             R.id.nav_menu_connections -> {
                 Snackbar.make(findViewById(R.id.main_content), "Not Implemented", Snackbar.LENGTH_LONG)
@@ -137,19 +177,6 @@ class DrawerStartActivity : AppCompatActivity(),
             }
 
         }
-        /* if (id == R.id.nav_camera) {
-            // Handle the camera action
-        } else if (id == R.id.nav_gallery) {
-
-        } else if (id == R.id.nav_slideshow) {
-
-        } else if (id == R.id.nav_manage) {
-
-        } else if (id == R.id.nav_share) {
-
-        } else if (id == R.id.nav_send) {
-
-        }*/
 
         val drawer = findViewById<DrawerLayout>(R.id.drawer_layout)
         drawer.closeDrawer(GravityCompat.START)

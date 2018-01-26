@@ -47,12 +47,14 @@ class SignalsDataService : Service() {
     }
 
     override fun onUnbind(intent: Intent?): Boolean {
-        mqttClients.forEach { if (it.mqttAndroidClient.isConnected) it.disconnect() }
+        stopMqttClients()
         return super.onUnbind(intent)
     }
 
     fun stopWork() {
-        if (state == StatusService.WORKING){
+        //TODO
+
+        if (state == StatusService.WORKING) {
 
         }
     }
@@ -69,7 +71,7 @@ class SignalsDataService : Service() {
             StatusService.ERROR_CONFIG -> sendWarning(resources.getString(R.string.error_read_config))
             StatusService.NOT_READY -> {
                 state = StatusService.READ_CONFIG
-                if( loadConfig() ) {
+                if (loadConfig()) {
                     startMqttClients()
                 }
             }
@@ -80,12 +82,16 @@ class SignalsDataService : Service() {
     }
 
 
-    private fun startMqttClients()  {
+    private fun startMqttClients() {
         mqttClients.forEach { it.connect() }
     }
 
-    private fun stopMqttClients(){
-        mqttClients.forEach { it.disconnect() }
+    private fun stopMqttClients() {
+        mqttClients.forEach {
+            if (it.mqttAndroidClient.isConnected) {
+                it.disconnect()
+            }
+        }
     }
 
     fun showFeedbackForUser(string: String) {
@@ -188,6 +194,8 @@ class SignalsDataService : Service() {
                 }
             }
         }
+
+        showFeedbackForUser(resources.getString(R.string.project_loaded))
 
         state = StatusService.READY_TO_START
     }

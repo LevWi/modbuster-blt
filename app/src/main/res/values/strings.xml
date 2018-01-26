@@ -13,13 +13,13 @@
     <string name="barcode_failure">No barcode captured</string>
     <string name="barcode_error">"Error reading barcode: %1$s"</string>
 
-
     <string name="error_read_config">"Error reading configuration&#8230; Check it"</string>
     <string name="config_not_found">"Configuration not found&#8230;"</string>
 
-
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
+
+    <string name="project_loaded">"Проект загружен"</string>
 
     <string name="action_settings">Settings</string>
     <string name="settings">Настройки</string>
