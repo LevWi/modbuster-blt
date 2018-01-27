@@ -24,6 +24,7 @@ import android.view.MenuItem
 import com.lfom.modbuster.R
 import com.lfom.modbuster.services.SignalsDataService
 import com.lfom.modbuster.services.StatusService
+import com.lfom.modbuster.ui.barcode.BarcodeCaptureActivity
 import kotlinx.coroutines.experimental.launch
 
 
@@ -82,8 +83,18 @@ class DrawerStartActivity : AppCompatActivity(),
         val fab = findViewById<FloatingActionButton>(R.id.fab)
 
         fab.setOnClickListener { view ->
-            Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                    .setAction("Action", null).show()
+
+                // launch barcode activity.
+                val intent = Intent(this, BarcodeCaptureActivity::class.java)
+
+                //TODO Сейчас запуск всегда с автофокусом AutoFocus + Flash
+                intent.putExtra(BarcodeCaptureActivity.AutoFocus, true ) //autoFocus.isChecked())
+                intent.putExtra(BarcodeCaptureActivity.UseFlash, true )  //useFlash.isChecked())
+
+                startActivity(intent)
+                //startActivityForResult(intent, RC_BARCODE_CAPTURE)
+            //Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+            //        .setAction("Action", null).show()
         }
 
         val drawer = findViewById<DrawerLayout>(R.id.drawer_layout)

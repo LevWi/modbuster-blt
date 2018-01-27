@@ -1,23 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/topLayout"
-    android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:keepScreenOn="true">
+    android:keepScreenOn="true"
+    android:orientation="vertical">
 
-  <com.lfom.modbuster.ui.camera.CameraSourcePreview
-      android:id="@+id/preview"
-      android:layout_width="match_parent"
-      android:layout_height="match_parent">
-
-    <com.lfom.modbuster.ui.camera.GraphicOverlay
-        android:id="@+id/graphicOverlay"
+    <com.lfom.modbuster.ui.camera.CameraSourcePreview
+        android:id="@+id/preview"
+        android:layout_gravity="center"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="0dp"
+        android:layout_weight="50">
 
-  </com.lfom.modbuster.ui.camera.CameraSourcePreview>
+        <com.lfom.modbuster.ui.camera.GraphicOverlay
+            android:id="@+id/graphicOverlay"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+    </com.lfom.modbuster.ui.camera.CameraSourcePreview>
+
+    <ListView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="50">
+
+    </ListView>
 
 </LinearLayout>
