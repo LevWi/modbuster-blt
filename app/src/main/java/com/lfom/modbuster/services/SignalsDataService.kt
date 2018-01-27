@@ -72,7 +72,9 @@ class SignalsDataService : Service() {
             StatusService.ERROR_CONFIG -> sendWarning(resources.getString(R.string.error_read_config))
             StatusService.NOT_READY -> {
                 state = StatusService.READ_CONFIG
-                if (loadConfig()) {
+                val result = loadConfig()
+                if (result) {
+                    Log.w(MAIN_DATA_SERVICE_TAG, "Starting...")
                     startMqttClients()
                 }
             }

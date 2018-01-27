@@ -1,18 +1,13 @@
 package com.lfom.modbuster.ui
 
-import android.content.Context
-import android.graphics.Color
 import android.support.v4.content.ContextCompat
 import android.support.v7.widget.RecyclerView
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.FrameLayout
 import android.widget.LinearLayout
-import android.widget.ListView
 import android.widget.TextView
-
 import com.lfom.modbuster.R
 import com.lfom.modbuster.services.DataSignalEvent
 import com.lfom.modbuster.services.SignalsDataService
@@ -20,7 +15,6 @@ import com.lfom.modbuster.signals.*
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 import org.greenrobot.eventbus.ThreadMode
-
 
 
 // TODO есть ли возможность иссползовать? import kotlinx.android.synthetic.main.card_group_signals.*
@@ -33,7 +27,6 @@ private const val TAG = "SignalsItemAdapter"
 class SignalsItemAdapter(private val connection: SignalsDataServiceConnection) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     private val uiSignalsIds = mutableListOf<Int>()
-
 
 
     override fun onCreateViewHolder(parent: ViewGroup?, viewType: Int): RecyclerView.ViewHolder {
@@ -65,7 +58,8 @@ class SignalsItemAdapter(private val connection: SignalsDataServiceConnection) :
             is GroupSignalsViewHolder -> {
                 srv.groups.elementAt(position).let {
                     holder.name.text = it.name
-                    it.signals.forEach {key ->
+                    holder.clearSignals()
+                    it.signals.forEach { key ->
                         srv.signals[key]?.let {
                             holder.addSignal(it, key)
                         }
@@ -111,33 +105,31 @@ class GroupSignalsViewHolder private constructor(view: View) : RecyclerView.View
 
     val name: TextView = view.findViewById(R.id.group_name)
 
-    val listViewOfSignals: ListView = view.findViewById(R.id.group_signals_listview)
+    val groupViewSignalsCard: LinearLayout = view.findViewById(R.id.group_signals_listview)
 
     val listSignal: MutableList<SignalCardWrapper> = mutableListOf()
 
 
-
-    fun addSignal(signal: SignalChannel, id : Int): SignalCardWrapper {
-        val view = LayoutInflater.from(listViewOfSignals.context)
-                .inflate(R.layout.card_signal, listViewOfSignals, true)
+    fun addSignal(signal: SignalChannel, id: Int): SignalCardWrapper {
+        val view = LayoutInflater.from(groupViewSignalsCard.context)
+                .inflate(R.layout.card_signal, null, false)
 
         val signalViewWrapper = SignalCardWrapper(view)
 
-
         signalViewWrapper.boolType = signal.options.type == TypePayload.BOOL
         signalViewWrapper.idSignal = id
+        signalViewWrapper.name.text = signal.name
 
         listSignal.add(signalViewWrapper)
-        listViewOfSignals.addView(view)
+        groupViewSignalsCard.addView(view)
 
         return signalViewWrapper
     }
 
 
-
     fun clearSignals() {
         listSignal.clear()
-        listViewOfSignals.removeViews(0, listViewOfSignals.count)
+        groupViewSignalsCard.removeViews(0, groupViewSignalsCard.childCount)
     }
 }
 
@@ -156,7 +148,7 @@ class SignalViewHolder private constructor(view: View) : RecyclerView.ViewHolder
 
 data class SignalCardWrapper(val view: View) {
 
-    var idSignal : Int = -999
+    var idSignal: Int = -999
 
     var boolType: Boolean = false
 
@@ -171,7 +163,7 @@ data class SignalCardWrapper(val view: View) {
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     fun onNewData(event: DataSignalEvent) {
-        if (event.idSender == idSignal){
+        if (event.idSender == idSignal) {
             setNewData(event.payload ?: return)
         }
     }
@@ -186,25 +178,28 @@ data class SignalCardWrapper(val view: View) {
     }
 
 
-
     fun setNewData(payload: SignalPayload) {
         when (payload) {
-            is IConvertible -> if (boolType) {
-                payload.asBool(null, true)?.also {
-                    if (it) {
-                        setDataColor(R.color.TruePayload)
-                    } else {
-                        setDataColor(R.color.FalsePayload)
+            is IConvertible ->
+                if (boolType) {
+                    payload.asBool(null, true)?.let {
+                        if (it) {
+                            setDataColor(R.color.TruePayload)
+                            data.text = "ON"
+                        } else {
+                            setDataColor(R.color.FalsePayload)
+                            data.text = "OFF"
+                        }
+
+                        return
                     }
+                    // Ошибка конвертации
+                    setDataColor(R.color.BadPayload)
+                    data.text = "###"
+                } else {
+                    // TODO Исправить реверс данных
                     data.text = payload.asString(null, true)
-                    return
                 }
-                // Ошибка конвертации
-                setDataColor(R.color.BadPayload)
-                data.text = "###"
-            } else {
-                data.text = payload.asString(null)
-            }
             is BadData -> {
                 setDataColor(R.color.BadPayload)
                 data.text = payload.message
@@ -214,7 +209,6 @@ data class SignalCardWrapper(val view: View) {
 
 
 }
-
 
 
 interface SignalsDataServiceConnection {

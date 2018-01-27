@@ -1,9 +1,6 @@
 package com.lfom.modbuster.signals
 
-
-/**
- * Created by gener on 06.01.2018.
- */
+import java.util.*
 
 
 interface IConvertible {
@@ -14,10 +11,7 @@ interface IConvertible {
     fun setFromPayload(data: IConvertible, reverse : Boolean = false): Boolean
 }
 
-/*
-interface IPayloadCreator{
-    fun create() : SignalPayload
-}*/
+
 
 enum class TypePayload{
     BOOL, INT, FLOAT, STRING
@@ -39,6 +33,8 @@ open class PayloadOptions {
     var multiplier = 1.0
 
     var shift = 0
+
+    var format = ""
 
     fun create() : SignalPayload {
         return when(type) {
@@ -89,7 +85,7 @@ data class BadData(val message: String = "BAD") : SignalPayload() {
 
 data class BoolPayload(private val boolOptions: PayloadOptions, private var value: Boolean = false) : SignalPayload(), IConvertible {
 
-    override fun asBool(options: PayloadOptions?, reverse : Boolean): Boolean? {
+    override fun asBool(options: PayloadOptions?, reverse : Boolean): Boolean {
         return value
     }
 
@@ -140,7 +136,12 @@ data class IntPayload(private val intOptions: PayloadOptions,
     }
 
     override fun asString(options: PayloadOptions?, reverse : Boolean): String {
-        return asInt(options, reverse).toString()
+        val vl = asInt(options, reverse)
+        val opt : PayloadOptions = if (reverse) intOptions else options ?: DefaultOptions
+        if (opt.format == "") {
+            return vl.toString()
+        }
+        return String.format(Locale.ROOT, opt.format, vl)
     }
 
     override fun setFromPayload(data: IConvertible, reverse : Boolean): Boolean {
@@ -172,7 +173,12 @@ data class FloatPayload(private val floatOptions: PayloadOptions,
     }
 
     override fun asString(options: PayloadOptions?, reverse: Boolean): String {
-        return asFloat(options).toString()
+        val vl = asFloat(options)
+        val opt : PayloadOptions = if (reverse) floatOptions else options ?: DefaultOptions
+        if (opt.format == "") {
+            return vl.toString()
+        }
+        return String.format(Locale.ROOT, opt.format, vl)
     }
 
     override fun setFromPayload(data: IConvertible, reverse: Boolean): Boolean {

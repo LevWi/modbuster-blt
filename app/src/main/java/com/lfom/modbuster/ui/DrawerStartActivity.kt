@@ -153,13 +153,18 @@ class DrawerStartActivity : AppCompatActivity(),
 
 
                 boundService?.let {
+
                     if (it.state == StatusService.NOT_READY) {
                         launch {
-                            it.loadConfig()
+                            it.startWork()
                             runOnUiThread { refrashData() }
                         }
-                    } else {
-                        refrashData()
+                    }
+                    else if(it.state == StatusService.READY_TO_START) {
+                        it.startWork()
+                    }
+                    else {
+
                     }
                 }
 

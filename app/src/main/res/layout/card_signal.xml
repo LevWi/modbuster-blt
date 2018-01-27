@@ -4,7 +4,7 @@
     xmlns:card_view="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     android:layout_centerHorizontal="true"
-    android:layout_width="wrap_content"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginTop="5dp"
     android:layout_marginLeft="5dp"
@@ -17,14 +17,17 @@
         android:id="@+id/card_view_signal"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        card_view:contentPaddingTop="5dp"
+        card_view:contentPaddingBottom="5dp"
+        card_view:contentPadding="7dp"
         card_view:cardCornerRadius="5dp"
-        card_view:cardElevation="5dp"
+        card_view:cardElevation="0dp"
         android:foregroundTintMode="multiply"
         >
         <LinearLayout
             android:id="@+id/controls"
             android:orientation="vertical"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content">
             <TextView
                 android:id="@+id/card_signal_name"
@@ -38,8 +41,9 @@
             <TextView
                 android:id="@+id/card_signal_data"
                 android:textAlignment="center"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:gravity="center"
                 style="@style/TextAppearance.AppCompat.PayloadValue"
                 tools:text="50"/>
         </LinearLayout>

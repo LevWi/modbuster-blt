@@ -5,6 +5,7 @@ import android.content.Context
 import android.os.Bundle
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
+import android.support.v7.widget.StaggeredGridLayoutManager
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -55,7 +56,10 @@ class SignalsListFragment : Fragment() {
 //            }
 //            //recyclerView.setAdapter(new MySignalsItemRecyclerViewAdapter(DummyContent.ITEMS, mListener));
 //        }
-        recView.layoutManager = LinearLayoutManager(activity)
+
+        //recView.layoutManager = LinearLayoutManager(activity)
+
+        recView.layoutManager = StaggeredGridLayoutManager(2 ,StaggeredGridLayoutManager.VERTICAL)
 
         recyclerView = recView
 
