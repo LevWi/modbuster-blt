@@ -1,7 +1,8 @@
 package com.lfom.modbuster.signals
 
+import com.lfom.modbuster.services.DataSignalEvent
 import com.squareup.moshi.Json
-
+import org.greenrobot.eventbus.EventBus
 
 
 class SignalChannel(
@@ -28,21 +29,21 @@ class SignalChannel(
     var publishListener: IPublishing? = null
 
 
-    var route : RouteChannel = RouteChannel.IN_OUT
+    var route: RouteChannel = RouteChannel.IN_OUT
 
     /**
      *  0 - публикация идет по привязанному каналу Arrived.
      */
     @Json(name = "publish_receiver_id")
-    var publishListenerId : Int = 0
+    var publishListenerId: Int = 0
 
     @Transient
-    var timePoint : Long = 0
+    var timePoint: Long = 0
 
     @Json(name = "receivers")
     var arrivingDataEventManager = ArrivingDataEventManager()
 
-    var UIvisible : Boolean = true
+    var UIvisible: Boolean = true
 
     fun notifyListeners(data: SignalPayload) {
         arrivingDataEventManager.notifyListeners(data, this)
@@ -55,7 +56,7 @@ class SignalChannel(
         var payloadBuf = options.create()
         when (data) {
             is IConvertible -> {
-                if (!(payloadBuf as IConvertible).setFromPayload(data, reverse = true)){
+                if (!(payloadBuf as IConvertible).setFromPayload(data, reverse = true)) {
                     payloadBuf = BadData(BadData.CONVERSION_ERROR)
                 }
             }
@@ -73,9 +74,17 @@ class SignalChannel(
         //}
         arrivedCallback?.invoke(data, sender, this)
         notifyListeners(payload ?: return)
+
+        EventBus.getDefault()
+                .post(
+                        DataSignalEvent(
+                                this.idx,
+                                this.payload
+                        )
+                )
     }
 
-    fun setInnerPayload(data: SignalPayload, reverse : Boolean)  {
+    fun setInnerPayload(data: SignalPayload, reverse: Boolean) {
         timePoint = System.currentTimeMillis()
         when (data) {
             is IConvertible -> {
@@ -89,7 +98,7 @@ class SignalChannel(
     }
 }
 
-enum class RouteChannel{
+enum class RouteChannel {
     IN,
     OUT,
     IN_OUT,

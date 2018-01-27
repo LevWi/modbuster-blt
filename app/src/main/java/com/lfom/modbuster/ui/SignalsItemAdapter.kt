@@ -1,15 +1,27 @@
 package com.lfom.modbuster.ui
 
+import android.content.Context
+import android.graphics.Color
+import android.support.v4.content.ContextCompat
 import android.support.v7.widget.RecyclerView
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.FrameLayout
+import android.widget.LinearLayout
 import android.widget.ListView
 import android.widget.TextView
 
 import com.lfom.modbuster.R
+import com.lfom.modbuster.services.DataSignalEvent
 import com.lfom.modbuster.services.SignalsDataService
+import com.lfom.modbuster.signals.*
+import org.greenrobot.eventbus.EventBus
+import org.greenrobot.eventbus.Subscribe
+import org.greenrobot.eventbus.ThreadMode
+
+
 
 // TODO есть ли возможность иссползовать? import kotlinx.android.synthetic.main.card_group_signals.*
 
@@ -18,8 +30,11 @@ const val TYPE_SIGNAL: Int = 10
 private const val TAG = "SignalsItemAdapter"
 
 
-
 class SignalsItemAdapter(private val connection: SignalsDataServiceConnection) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+
+    private val uiSignalsIds = mutableListOf<Int>()
+
+
 
     override fun onCreateViewHolder(parent: ViewGroup?, viewType: Int): RecyclerView.ViewHolder {
         //TODO
@@ -33,7 +48,11 @@ class SignalsItemAdapter(private val connection: SignalsDataServiceConnection) :
 
     override fun getItemCount(): Int {
         val count = connection.service?.let {
-            it.signals.size + it.groups.size
+            uiSignalsIds.clear()
+            it.signals.forEach {
+                if (it.value.UIvisible) uiSignalsIds.add(it.key)
+            }
+            uiSignalsIds.size + it.groups.size
         } ?: 0
         Log.d(TAG, "Call getItemCount() = $count")
         return count
@@ -44,11 +63,21 @@ class SignalsItemAdapter(private val connection: SignalsDataServiceConnection) :
         val srv = connection.service ?: return
         when (holder) {
             is GroupSignalsViewHolder -> {
-                holder.name.text = srv.groups.elementAt(position).name
-                holder.listOfSignals.addView()
+                srv.groups.elementAt(position).let {
+                    holder.name.text = it.name
+                    it.signals.forEach {key ->
+                        srv.signals[key]?.let {
+                            holder.addSignal(it, key)
+                        }
+                    }
+                }
             }
             is SignalViewHolder -> {
-                holder.name.text = srv.signals.values.elementAt(position - srv.groups.size).name
+                val idSignal = uiSignalsIds[position - srv.groups.size]
+                srv.signals[idSignal]?.let {
+                    holder.signalCard.name.text = it.name
+                    holder.signalCard.idSignal = idSignal
+                }
             }
         }
     }
@@ -59,23 +88,12 @@ class SignalsItemAdapter(private val connection: SignalsDataServiceConnection) :
         val srv = connection.service ?: return -1
         val tp = when {
             position < srv.groups.size -> TYPE_GROUP
-            position < srv.groups.size + srv.signals.size -> TYPE_SIGNAL
+            position < srv.groups.size + uiSignalsIds.size -> TYPE_SIGNAL
             else -> -1
         }
         Log.w(TAG, "Call getItemViewType() = $tp , position = $position")
         return tp
     }
-}
-
-
-
-internal fun SignalsDataService.getUIsignals(){
-    this.signals.mapKeys { it.value.UIvisible }
-}
-
-internal fun SignalsDataService.getUIsignalsCount() : Int {
-    TODO()
-    return this.signals.count { it.value.UIvisible }
 }
 
 
@@ -93,9 +111,34 @@ class GroupSignalsViewHolder private constructor(view: View) : RecyclerView.View
 
     val name: TextView = view.findViewById(R.id.group_name)
 
-    val listOfSignals: ListView = view.findViewById(R.id.group_signals_listview)
+    val listViewOfSignals: ListView = view.findViewById(R.id.group_signals_listview)
+
+    val listSignal: MutableList<SignalCardWrapper> = mutableListOf()
 
 
+
+    fun addSignal(signal: SignalChannel, id : Int): SignalCardWrapper {
+        val view = LayoutInflater.from(listViewOfSignals.context)
+                .inflate(R.layout.card_signal, listViewOfSignals, true)
+
+        val signalViewWrapper = SignalCardWrapper(view)
+
+
+        signalViewWrapper.boolType = signal.options.type == TypePayload.BOOL
+        signalViewWrapper.idSignal = id
+
+        listSignal.add(signalViewWrapper)
+        listViewOfSignals.addView(view)
+
+        return signalViewWrapper
+    }
+
+
+
+    fun clearSignals() {
+        listSignal.clear()
+        listViewOfSignals.removeViews(0, listViewOfSignals.count)
+    }
 }
 
 class SignalViewHolder private constructor(view: View) : RecyclerView.ViewHolder(view) {
@@ -107,16 +150,75 @@ class SignalViewHolder private constructor(view: View) : RecyclerView.ViewHolder
         }
     }
 
-    val view: View
-        get() = super.itemView
+    val signalCard: SignalCardWrapper = SignalCardWrapper(view)
+}
+
+
+data class SignalCardWrapper(val view: View) {
+
+    var idSignal : Int = -999
+
+    var boolType: Boolean = false
 
     val name: TextView = view.findViewById(R.id.card_signal_name)
 
     val data: TextView = view.findViewById(R.id.card_signal_data)
 
+    fun setDataColor(resId: Int) {
+        val color = ContextCompat.getColor(view.context, resId)
+        data.setTextColor(color)
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    fun onNewData(event: DataSignalEvent) {
+        if (event.idSender == idSignal){
+            setNewData(event.payload ?: return)
+        }
+    }
+
+    init {
+        EventBus.getDefault().register(this)
+    }
+
+    // TODO
+    protected fun finalize() {
+        EventBus.getDefault().unregister(this)
+    }
+
+
+
+    fun setNewData(payload: SignalPayload) {
+        when (payload) {
+            is IConvertible -> if (boolType) {
+                payload.asBool(null, true)?.also {
+                    if (it) {
+                        setDataColor(R.color.TruePayload)
+                    } else {
+                        setDataColor(R.color.FalsePayload)
+                    }
+                    data.text = payload.asString(null, true)
+                    return
+                }
+                // Ошибка конвертации
+                setDataColor(R.color.BadPayload)
+                data.text = "###"
+            } else {
+                data.text = payload.asString(null)
+            }
+            is BadData -> {
+                setDataColor(R.color.BadPayload)
+                data.text = payload.message
+            }
+        }
+    }
+
 
 }
+
+
 
 interface SignalsDataServiceConnection {
     val service: SignalsDataService?
 }
+
+
