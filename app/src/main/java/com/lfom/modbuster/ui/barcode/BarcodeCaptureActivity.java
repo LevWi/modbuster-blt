@@ -20,15 +20,18 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 
 import android.graphics.Point;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.support.annotation.NonNull;
 
 import android.support.design.widget.Snackbar;
@@ -49,6 +52,7 @@ import com.google.android.gms.vision.CameraSource;
 import com.google.android.gms.vision.MultiProcessor;
 import com.google.android.gms.vision.barcode.Barcode;
 import com.google.android.gms.vision.barcode.BarcodeDetector;
+import com.lfom.modbuster.services.SignalsDataService;
 import com.lfom.modbuster.ui.camera.CameraSourcePreview;
 import com.lfom.modbuster.ui.camera.GraphicOverlay;
 
@@ -83,6 +87,28 @@ public final class BarcodeCaptureActivity extends AppCompatActivity implements B
     private ScaleGestureDetector scaleGestureDetector;
     private GestureDetector gestureDetector;
 
+
+    private SignalsDataService mService;
+    private boolean mBound;
+
+    private ServiceConnection mServiceConnection = new ServiceConnection() {
+
+        @Override
+        public void onServiceConnected(ComponentName className,
+                IBinder service) {
+            // We've bound to LocalService, cast the IBinder and get LocalService instance
+            SignalsDataService.SigDataServiceBinder binder = (SignalsDataService.SigDataServiceBinder) service;
+            mService = binder.getService();
+            mBound = true;
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName arg0) {
+            mBound = false;
+        }
+    };
+
+
     /**
      * Initializes the UI and creates the detector pipeline.
      */
@@ -110,9 +136,20 @@ public final class BarcodeCaptureActivity extends AppCompatActivity implements B
         gestureDetector = new GestureDetector(this, new CaptureGestureListener());
         scaleGestureDetector = new ScaleGestureDetector(this, new ScaleListener());
 
+
+
         Snackbar.make(mGraphicOverlay, "Tap to capture. Pinch/Stretch to zoom",
                 Snackbar.LENGTH_LONG)
                 .show();
+    }
+
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+        Intent intent = new Intent(this, SignalsDataService.class);
+        bindService(intent, mServiceConnection, Context.BIND_AUTO_CREATE);
     }
 
     /**
@@ -477,6 +514,6 @@ public final class BarcodeCaptureActivity extends AppCompatActivity implements B
     public void onBarcodeDetected(Barcode barcode) {
         final String data = barcode.rawValue;
 
-
+        // TODO создать адаптер
     }
 }
