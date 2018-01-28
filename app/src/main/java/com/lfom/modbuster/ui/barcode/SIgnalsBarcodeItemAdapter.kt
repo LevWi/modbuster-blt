@@ -1,18 +1,23 @@
 package com.lfom.modbuster.ui.barcode
 
 import android.os.CountDownTimer
+import android.os.Message
 import android.support.v7.widget.RecyclerView
 import android.view.ViewGroup
 import com.lfom.modbuster.ui.SignalViewHolder
 import com.lfom.modbuster.ui.SignalsDataServiceConnection
+import org.greenrobot.eventbus.EventBus
+import java.util.concurrent.ConcurrentHashMap
 
+
+const val LIVE_TIME: Long = 7500
 
 class SignalsBarcodeItemAdapter(private val connection: SignalsDataServiceConnection,
-                         val countInterval: Long = 150
+                                val countInterval: Long = 150
 
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
-    val tempViews = mutableSetOf<SuicideEntry>()
+    val tempViews : MutableMap<Int, SuicideEntry> = ConcurrentHashMap()
 
     val timer = object : CountDownTimer(3600000 /*TODO*/, countInterval) {
         override fun onFinish() {
@@ -21,15 +26,19 @@ class SignalsBarcodeItemAdapter(private val connection: SignalsDataServiceConnec
         }
 
         override fun onTick(millisUntilFinished: Long) {
+
             tempViews.forEach {
-                it.timeRemaining -= countInterval
+                it.value.timeRemaining -= countInterval
 
             }
-
-            tempViews.removeAll {
+            tempViews.values.removeAll {
                 it.timeRemaining <= 0
             }
-            notifyDataSetChanged()
+                    .let {
+                        if (it) notifyDataSetChanged()
+                        sendRefreshMessage()
+                    }
+
         }
     }
 
@@ -47,7 +56,7 @@ class SignalsBarcodeItemAdapter(private val connection: SignalsDataServiceConnec
 
         if (holder !is SignalViewHolder) return
 
-        val id = tempViews.elementAt(position).idSignal
+        val id = tempViews.keys.elementAt(position)
 
         srv.signals[id]?.let {
             holder.signalCard.name.text = it.name
@@ -55,12 +64,33 @@ class SignalsBarcodeItemAdapter(private val connection: SignalsDataServiceConnec
         }
     }
 
-    data class SuicideEntry(val idSignal: Int) {
-        var timeRemaining: Long = 2500
+    fun addNewBarcode(id: Int) {
+        val result = tempViews[id]?.also {
+            it.timeRemaining = LIVE_TIME
+        }
+
+        if (result == null) {
+            tempViews.put(id , SuicideEntry(id))
+            val index = tempViews.keys.indexOf(id)
+            notifyItemChanged(index)
+            sendRefreshMessage()
+        }
     }
+
+    private fun sendRefreshMessage(){
+        EventBus.getDefault().post(
+                EventMessage(BarcodeCaptureActivity.COMMAND_REFRESH_RECYCLERVIEW)
+        )
+    }
+
+    data class SuicideEntry(val idSignal: Int) {
+        var timeRemaining: Long = LIVE_TIME
+    }
+
+
 }
 
-
+class EventMessage( val message: String)
 
 
 

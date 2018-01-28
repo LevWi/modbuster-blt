@@ -9,9 +9,9 @@
 
     <com.lfom.modbuster.ui.camera.CameraSourcePreview
         android:id="@+id/preview"
-        android:layout_gravity="center"
         android:layout_width="match_parent"
         android:layout_height="0dp"
+        android:layout_gravity="center"
         android:layout_weight="50">
 
         <com.lfom.modbuster.ui.camera.GraphicOverlay
@@ -21,12 +21,18 @@
 
     </com.lfom.modbuster.ui.camera.CameraSourcePreview>
 
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/barcode_capture_recycler_view"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="50">
 
-    </android.support.v7.widget.RecyclerView>
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/barcode_capture_recycler_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            >
+
+        </android.support.v7.widget.RecyclerView>
+    </LinearLayout>
 
 </LinearLayout>

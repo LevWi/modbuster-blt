@@ -5,9 +5,10 @@
     <color name="colorAccent">#FF4081</color>
     <color name="colorGroup">#499dd1</color>
     <color name="colorSignal">#4979d1</color>
-
+    <color name="colorBackground">#c2c1c1</color>
 
     <color name="TruePayload">#0086af</color>
     <color name="FalsePayload">#9d9e9e</color>
     <color name="BadPayload">#f9fc81</color>
+
 </resources>

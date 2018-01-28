@@ -65,6 +65,9 @@ import java.io.IOException;
 
 import com.lfom.modbuster.R;
 
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 import org.jetbrains.annotations.Nullable;
 
 
@@ -78,6 +81,8 @@ public final class BarcodeCaptureActivity extends AppCompatActivity implements
         SignalsDataServiceConnection
 
 {
+    public static final String COMMAND_REFRESH_RECYCLERVIEW = "REFRESH_RECYCLERVIEW";
+
     private static final String TAG = "Barcode-reader";
 
     // intent request code to handle updating play services if needed.
@@ -100,6 +105,7 @@ public final class BarcodeCaptureActivity extends AppCompatActivity implements
     private GestureDetector gestureDetector;
 
 
+    private RecyclerView mRecyclerView;
     private SignalsBarcodeItemAdapter mSignalsBarcodeItemAdapter;
     private SignalsDataService mService;
     private boolean mBound;
@@ -156,10 +162,10 @@ public final class BarcodeCaptureActivity extends AppCompatActivity implements
         scaleGestureDetector = new ScaleGestureDetector(this, new ScaleListener());
 
         // Настройка динамического списка сигналов
-        RecyclerView recView = findViewById(R.id.barcode_capture_recycler_view);
-        recView.setLayoutManager(new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL));
+        mRecyclerView = findViewById(R.id.barcode_capture_recycler_view);
+        mRecyclerView.setLayoutManager(new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL));
         mSignalsBarcodeItemAdapter = new SignalsBarcodeItemAdapter(this, 500);
-        recView.setAdapter(mSignalsBarcodeItemAdapter);
+        mRecyclerView.setAdapter(mSignalsBarcodeItemAdapter);
 
 
         Snackbar.make(mGraphicOverlay, "Tap to capture. Pinch/Stretch to zoom",
@@ -284,6 +290,14 @@ public final class BarcodeCaptureActivity extends AppCompatActivity implements
     }
 
 
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onMessageEvent(EventMessage event) {
+        if (event.getMessage().equals(COMMAND_REFRESH_RECYCLERVIEW)) {
+            mRecyclerView.scrollToPosition(mSignalsBarcodeItemAdapter.getItemCount() -1 );
+        }
+    }
+
+
     @Override
     protected void onStart() {
         super.onStart();
@@ -291,13 +305,17 @@ public final class BarcodeCaptureActivity extends AppCompatActivity implements
         Intent intent = new Intent(this, SignalsDataService.class);
         bindService(intent, mServiceConnection, Context.BIND_AUTO_CREATE);
 
-        mSignalsBarcodeItemAdapter.getTimer().start();
+
     }
 
     @Override
     protected void onStop() {
         super.onStop();
+
+        EventBus.getDefault().unregister(this);
+
         mSignalsBarcodeItemAdapter.getTimer().cancel();
+
         unbindService(mServiceConnection);
     }
 
@@ -308,7 +326,12 @@ public final class BarcodeCaptureActivity extends AppCompatActivity implements
     @Override
     protected void onResume() {
         super.onResume();
+
         startCameraSource();
+
+        mSignalsBarcodeItemAdapter.getTimer().start();
+
+        EventBus.getDefault().register(this);
     }
 
     /**
@@ -525,11 +548,8 @@ public final class BarcodeCaptureActivity extends AppCompatActivity implements
                     int key = Integer.parseInt(data.split(":")[1]);
                     SignalChannel signal = mService.getSignals().get(key);
                     if (signal != null) {
-                        boolean result = mSignalsBarcodeItemAdapter.getTempViews().add(
-                                new SignalsBarcodeItemAdapter.SuicideEntry(key));
-                        if (result) {
-                            mSignalsBarcodeItemAdapter.notifyDataSetChanged();
-                        }
+                        mSignalsBarcodeItemAdapter.addNewBarcode(key);
+
                     }
                 } catch (Exception ex) {
                     Log.d(TAG, "Error parse barcode");
