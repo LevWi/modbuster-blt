@@ -37,6 +37,8 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.util.Log;
 import android.view.Display;
 import android.view.GestureDetector;
@@ -52,7 +54,10 @@ import com.google.android.gms.vision.CameraSource;
 import com.google.android.gms.vision.MultiProcessor;
 import com.google.android.gms.vision.barcode.Barcode;
 import com.google.android.gms.vision.barcode.BarcodeDetector;
+
 import com.lfom.modbuster.services.SignalsDataService;
+import com.lfom.modbuster.signals.SignalChannel;
+import com.lfom.modbuster.ui.SignalsDataServiceConnection;
 import com.lfom.modbuster.ui.camera.CameraSourcePreview;
 import com.lfom.modbuster.ui.camera.GraphicOverlay;
 
@@ -60,12 +65,19 @@ import java.io.IOException;
 
 import com.lfom.modbuster.R;
 
+import org.jetbrains.annotations.Nullable;
+
+
 /**
  * Activity for the multi-tracker app.  This app detects barcodes and displays the value with the
  * rear facing camera. During detection overlay graphics are drawn to indicate the position,
  * size, and ID of each barcode.
  */
-public final class BarcodeCaptureActivity extends AppCompatActivity implements BarcodeGraphicTracker.BarcodeUpdateListener {
+public final class BarcodeCaptureActivity extends AppCompatActivity implements
+        BarcodeGraphicTracker.BarcodeUpdateListener,
+        SignalsDataServiceConnection
+
+{
     private static final String TAG = "Barcode-reader";
 
     // intent request code to handle updating play services if needed.
@@ -88,6 +100,7 @@ public final class BarcodeCaptureActivity extends AppCompatActivity implements B
     private GestureDetector gestureDetector;
 
 
+    private SignalsBarcodeItemAdapter mSignalsBarcodeItemAdapter;
     private SignalsDataService mService;
     private boolean mBound;
 
@@ -95,8 +108,8 @@ public final class BarcodeCaptureActivity extends AppCompatActivity implements B
 
         @Override
         public void onServiceConnected(ComponentName className,
-                IBinder service) {
-            // We've bound to LocalService, cast the IBinder and get LocalService instance
+                                       IBinder service) {
+
             SignalsDataService.SigDataServiceBinder binder = (SignalsDataService.SigDataServiceBinder) service;
             mService = binder.getService();
             mBound = true;
@@ -108,6 +121,12 @@ public final class BarcodeCaptureActivity extends AppCompatActivity implements B
         }
     };
 
+
+    @Nullable
+    @Override
+    public SignalsDataService getService() {
+        return mService;
+    }
 
     /**
      * Initializes the UI and creates the detector pipeline.
@@ -136,6 +155,11 @@ public final class BarcodeCaptureActivity extends AppCompatActivity implements B
         gestureDetector = new GestureDetector(this, new CaptureGestureListener());
         scaleGestureDetector = new ScaleGestureDetector(this, new ScaleListener());
 
+        // Настройка динамического списка сигналов
+        RecyclerView recView = findViewById(R.id.barcode_capture_recycler_view);
+        recView.setLayoutManager(new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL));
+        mSignalsBarcodeItemAdapter = new SignalsBarcodeItemAdapter(this, 500);
+        recView.setAdapter(mSignalsBarcodeItemAdapter);
 
 
         Snackbar.make(mGraphicOverlay, "Tap to capture. Pinch/Stretch to zoom",
@@ -143,14 +167,6 @@ public final class BarcodeCaptureActivity extends AppCompatActivity implements B
                 .show();
     }
 
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-
-        Intent intent = new Intent(this, SignalsDataService.class);
-        bindService(intent, mServiceConnection, Context.BIND_AUTO_CREATE);
-    }
 
     /**
      * Handles the requesting of the camera permission.  This includes
@@ -239,7 +255,6 @@ public final class BarcodeCaptureActivity extends AppCompatActivity implements B
         }
 
 
-
         //Расчет приблизительного размера превью камеры TODO
         Display display = getWindowManager().getDefaultDisplay();
         Point size = new Point();
@@ -247,14 +262,14 @@ public final class BarcodeCaptureActivity extends AppCompatActivity implements B
         float width = size.x;
         float height = size.y;
 
-        float ratio =  height / 2 / width ;
+        float ratio = height / 2 / width;
 
         // Creates and starts the camera.  Note that this uses a higher resolution in comparison
         // to other detection examples to enable the barcode detector to detect small barcodes
         // at long distances.
         CameraSource.Builder builder = new CameraSource.Builder(getApplicationContext(), barcodeDetector)
                 .setFacing(CameraSource.CAMERA_FACING_BACK)
-                .setRequestedPreviewSize(1600 ,  (int)(1600 * ratio) ) //TODO Поменял местами
+                .setRequestedPreviewSize(1600, (int) (1600 * ratio)) //TODO Поменял местами
                 .setRequestedFps(15.0f);
 
         // make sure that auto focus is an available option
@@ -269,29 +284,22 @@ public final class BarcodeCaptureActivity extends AppCompatActivity implements B
     }
 
 
-    //TODO Извлечение экземпляра камеры из CameraSource
-    /*
-    private static Camera getCamera(@NonNull CameraSource cameraSource) {
-        Field[] declaredFields = CameraSource.class.getDeclaredFields();
+    @Override
+    protected void onStart() {
+        super.onStart();
 
-        for (Field field : declaredFields) {
-            if (field.getType() == Camera.class) {
-                field.setAccessible(true);
-                try {
-                    Camera camera = (Camera) field.get(cameraSource);
-                    if (camera != null) {
-                        return camera;
-                    }
-                    return null;
-                } catch (IllegalAccessException e) {
-                    e.printStackTrace();
-                }
-                break;
-            }
-        }
-        return null;
-    }*/
+        Intent intent = new Intent(this, SignalsDataService.class);
+        bindService(intent, mServiceConnection, Context.BIND_AUTO_CREATE);
 
+        mSignalsBarcodeItemAdapter.getTimer().start();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        mSignalsBarcodeItemAdapter.getTimer().cancel();
+        unbindService(mServiceConnection);
+    }
 
 
     /**
@@ -300,9 +308,6 @@ public final class BarcodeCaptureActivity extends AppCompatActivity implements B
     @Override
     protected void onResume() {
         super.onResume();
-
-
-
         startCameraSource();
     }
 
@@ -512,8 +517,24 @@ public final class BarcodeCaptureActivity extends AppCompatActivity implements B
 
     @Override
     public void onBarcodeDetected(Barcode barcode) {
-        final String data = barcode.rawValue;
-
-        // TODO создать адаптер
+        // Добавляем сигнал во временный список
+        if (mBound) {
+            final String data = barcode.rawValue;
+            if (data.startsWith("sig:")) {
+                try {
+                    int key = Integer.parseInt(data.split(":")[1]);
+                    SignalChannel signal = mService.getSignals().get(key);
+                    if (signal != null) {
+                        boolean result = mSignalsBarcodeItemAdapter.getTempViews().add(
+                                new SignalsBarcodeItemAdapter.SuicideEntry(key));
+                        if (result) {
+                            mSignalsBarcodeItemAdapter.notifyDataSetChanged();
+                        }
+                    }
+                } catch (Exception ex) {
+                    Log.d(TAG, "Error parse barcode");
+                }
+            }
+        }
     }
 }

@@ -21,12 +21,12 @@
 
     </com.lfom.modbuster.ui.camera.CameraSourcePreview>
 
-    <ListView
-        android:id="@+id/barcode_capture_list_view"
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/barcode_capture_recycler_view"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="50">
 
-    </ListView>
+    </android.support.v7.widget.RecyclerView>
 
 </LinearLayout>
