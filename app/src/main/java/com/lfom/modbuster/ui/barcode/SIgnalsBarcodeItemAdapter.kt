@@ -1,6 +1,7 @@
 package com.lfom.modbuster.ui.barcode
 
 import android.os.CountDownTimer
+import android.os.Handler
 import android.os.Message
 import android.support.v7.widget.RecyclerView
 import android.view.ViewGroup
@@ -35,8 +36,10 @@ class SignalsBarcodeItemAdapter(private val connection: SignalsDataServiceConnec
                 it.timeRemaining <= 0
             }
                     .let {
-                        if (it) notifyDataSetChanged()
-                        sendRefreshMessage()
+                        if (it) {
+                            notifyDataSetChanged()
+                            sendRefreshMessage()
+                        }
                     }
 
         }

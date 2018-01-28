@@ -293,7 +293,7 @@ public final class BarcodeCaptureActivity extends AppCompatActivity implements
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onMessageEvent(EventMessage event) {
         if (event.getMessage().equals(COMMAND_REFRESH_RECYCLERVIEW)) {
-            mRecyclerView.scrollToPosition(mSignalsBarcodeItemAdapter.getItemCount() -1 );
+            mRecyclerView.scrollToPosition(mSignalsBarcodeItemAdapter.getItemCount() - 1);
         }
     }
 
