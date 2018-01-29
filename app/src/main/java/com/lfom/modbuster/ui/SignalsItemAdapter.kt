@@ -71,6 +71,7 @@ class SignalsItemAdapter(private val connection: SignalsDataServiceConnection) :
                 srv.signals[idSignal]?.let {
                     holder.signalCard.name.text = it.name
                     holder.signalCard.idSignal = idSignal
+                    holder.signalCard.setNewData(it.payload ?: return@let)
                 }
             }
         }
@@ -119,6 +120,11 @@ class GroupSignalsViewHolder private constructor(view: View) : RecyclerView.View
         signalViewWrapper.boolType = signal.options.type == TypePayload.BOOL
         signalViewWrapper.idSignal = id
         signalViewWrapper.name.text = signal.name
+
+        signal.payload?.let {
+            signalViewWrapper.setNewData(it)
+        }
+
 
         listSignal.add(signalViewWrapper)
         groupViewSignalsCard.addView(view)
@@ -180,6 +186,7 @@ data class SignalCardWrapper(val view: View) {
 
     fun setNewData(payload: SignalPayload) {
         when (payload) {
+
             is IConvertible ->
                 if (boolType) {
                     payload.asBool(null, true)?.let {
@@ -198,6 +205,7 @@ data class SignalCardWrapper(val view: View) {
                     data.text = "###"
                 } else {
                     // TODO Исправить реверс данных
+                    setDataColor(R.color.StandardPayload)
                     data.text = payload.asString(null, true)
                 }
             is BadData -> {

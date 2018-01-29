@@ -37,6 +37,7 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.util.Log;
@@ -119,6 +120,7 @@ public final class BarcodeCaptureActivity extends AppCompatActivity implements
             SignalsDataService.SigDataServiceBinder binder = (SignalsDataService.SigDataServiceBinder) service;
             mService = binder.getService();
             mBound = true;
+            mRecyclerView.getAdapter().notifyDataSetChanged();
         }
 
         @Override
@@ -163,10 +165,15 @@ public final class BarcodeCaptureActivity extends AppCompatActivity implements
 
         // Настройка динамического списка сигналов
         mRecyclerView = findViewById(R.id.barcode_capture_recycler_view);
-        mRecyclerView.setLayoutManager(new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL));
-        mSignalsBarcodeItemAdapter = new SignalsBarcodeItemAdapter(this, 500);
+
+
+        mSignalsBarcodeItemAdapter = new SignalsBarcodeItemAdapter(this, 250);
         mRecyclerView.setAdapter(mSignalsBarcodeItemAdapter);
 
+        StaggeredGridLayoutManager layoutManager = new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL);
+        //LinearLayoutManager layoutManager = new LinearLayoutManager(this);
+        layoutManager.scrollToPosition(0);
+        mRecyclerView.setLayoutManager(layoutManager);
 
         Snackbar.make(mGraphicOverlay, "Tap to capture. Pinch/Stretch to zoom",
                 Snackbar.LENGTH_LONG)
@@ -293,7 +300,9 @@ public final class BarcodeCaptureActivity extends AppCompatActivity implements
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onMessageEvent(EventMessage event) {
         if (event.getMessage().equals(COMMAND_REFRESH_RECYCLERVIEW)) {
+
             mRecyclerView.scrollToPosition(mSignalsBarcodeItemAdapter.getItemCount() - 1);
+
         }
     }
 
@@ -304,6 +313,8 @@ public final class BarcodeCaptureActivity extends AppCompatActivity implements
 
         Intent intent = new Intent(this, SignalsDataService.class);
         bindService(intent, mServiceConnection, Context.BIND_AUTO_CREATE);
+
+
 
 
     }

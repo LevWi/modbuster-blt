@@ -1,24 +1,25 @@
 package com.lfom.modbuster.ui.barcode
 
 import android.os.CountDownTimer
-import android.os.Handler
-import android.os.Message
 import android.support.v7.widget.RecyclerView
 import android.view.ViewGroup
+import com.lfom.modbuster.signals.TypePayload
 import com.lfom.modbuster.ui.SignalViewHolder
 import com.lfom.modbuster.ui.SignalsDataServiceConnection
+import kotlinx.coroutines.experimental.sync.Mutex
 import org.greenrobot.eventbus.EventBus
-import java.util.concurrent.ConcurrentHashMap
 
 
-const val LIVE_TIME: Long = 7500
+const val LIVE_TIME: Long = 5000
 
 class SignalsBarcodeItemAdapter(private val connection: SignalsDataServiceConnection,
                                 val countInterval: Long = 150
 
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
-    val tempViews : MutableMap<Int, SuicideEntry> = ConcurrentHashMap()
+    val mutex = Mutex(false)
+
+    val tempViews : MutableMap<Int, SuicideEntry> = LinkedHashMap()
 
     val timer = object : CountDownTimer(3600000 /*TODO*/, countInterval) {
         override fun onFinish() {
@@ -28,22 +29,39 @@ class SignalsBarcodeItemAdapter(private val connection: SignalsDataServiceConnec
 
         override fun onTick(millisUntilFinished: Long) {
 
-            tempViews.forEach {
-                it.value.timeRemaining -= countInterval
+            //if (mutex.tryLock()) {
 
-            }
-            tempViews.values.removeAll {
-                it.timeRemaining <= 0
-            }
-                    .let {
-                        if (it) {
-                            notifyDataSetChanged()
-                            sendRefreshMessage()
-                        }
+                tempViews.forEach {
+                    it.value.timeRemaining -= countInterval
+                }
+
+
+                tempViews.entries.forEachIndexed { index, element ->
+                    if (element.value.timeRemaining <= 0) {
+                        tempViews.remove(element.key)
+                       notifyItemRemoved(index)
+
+
+
+                        sendRefreshMessage()
+                        return
                     }
-
+                }
+             //   mutex.unlock()
+            //}
         }
     }
+
+    init {
+        setHasStableIds(true)
+    }
+
+
+    override fun getItemId(position: Int): Long {
+        return tempViews.keys.elementAt(position).toLong()
+    }
+
+
 
     override fun onCreateViewHolder(parent: ViewGroup?, viewType: Int): RecyclerView.ViewHolder {
         return SignalViewHolder.create(parent!!)
@@ -62,8 +80,12 @@ class SignalsBarcodeItemAdapter(private val connection: SignalsDataServiceConnec
         val id = tempViews.keys.elementAt(position)
 
         srv.signals[id]?.let {
-            holder.signalCard.name.text = it.name
-            holder.signalCard.idSignal = id
+            with(holder.signalCard) {
+                name.text = it.name
+                idSignal = id
+                boolType = it.options.type == TypePayload.BOOL
+                setNewData(it.payload ?: return@with)
+            }
         }
     }
 
@@ -75,7 +97,9 @@ class SignalsBarcodeItemAdapter(private val connection: SignalsDataServiceConnec
         if (result == null) {
             tempViews.put(id , SuicideEntry(id))
             val index = tempViews.keys.indexOf(id)
-            notifyItemChanged(index)
+
+            notifyItemInserted(index)
+            //notifyDataSetChanged()
             sendRefreshMessage()
         }
     }
