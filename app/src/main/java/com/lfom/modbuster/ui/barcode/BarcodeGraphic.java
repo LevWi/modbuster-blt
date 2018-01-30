@@ -35,7 +35,11 @@ public class BarcodeGraphic extends GraphicOverlay.Graphic {
     private static final int COLOR_CHOICES[] = {
             Color.BLUE,
             Color.CYAN,
-            Color.GREEN
+            Color.GREEN,
+            Color.WHITE,
+            Color.RED,
+            Color.YELLOW,
+            Color.MAGENTA
     };
 
     private static int mCurrentColorIndex = 0;

@@ -6,7 +6,6 @@ import android.view.ViewGroup
 import com.lfom.modbuster.signals.TypePayload
 import com.lfom.modbuster.ui.SignalViewHolder
 import com.lfom.modbuster.ui.SignalsDataServiceConnection
-import kotlinx.coroutines.experimental.sync.Mutex
 import org.greenrobot.eventbus.EventBus
 
 
@@ -16,8 +15,6 @@ class SignalsBarcodeItemAdapter(private val connection: SignalsDataServiceConnec
                                 val countInterval: Long = 150
 
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
-
-    val mutex = Mutex(false)
 
     val tempViews : MutableMap<Int, SuicideEntry> = LinkedHashMap()
 
@@ -29,39 +26,20 @@ class SignalsBarcodeItemAdapter(private val connection: SignalsDataServiceConnec
 
         override fun onTick(millisUntilFinished: Long) {
 
-            //if (mutex.tryLock()) {
-
                 tempViews.forEach {
                     it.value.timeRemaining -= countInterval
                 }
-
 
                 tempViews.entries.forEachIndexed { index, element ->
                     if (element.value.timeRemaining <= 0) {
                         tempViews.remove(element.key)
                        notifyItemRemoved(index)
-
-
-
                         sendRefreshMessage()
                         return
                     }
                 }
-             //   mutex.unlock()
-            //}
         }
     }
-
-    init {
-        setHasStableIds(true)
-    }
-
-
-    override fun getItemId(position: Int): Long {
-        return tempViews.keys.elementAt(position).toLong()
-    }
-
-
 
     override fun onCreateViewHolder(parent: ViewGroup?, viewType: Int): RecyclerView.ViewHolder {
         return SignalViewHolder.create(parent!!)
@@ -99,7 +77,6 @@ class SignalsBarcodeItemAdapter(private val connection: SignalsDataServiceConnec
             val index = tempViews.keys.indexOf(id)
 
             notifyItemInserted(index)
-            //notifyDataSetChanged()
             sendRefreshMessage()
         }
     }

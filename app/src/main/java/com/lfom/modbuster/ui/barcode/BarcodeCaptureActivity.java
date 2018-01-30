@@ -120,7 +120,6 @@ public final class BarcodeCaptureActivity extends AppCompatActivity implements
             SignalsDataService.SigDataServiceBinder binder = (SignalsDataService.SigDataServiceBinder) service;
             mService = binder.getService();
             mBound = true;
-            mRecyclerView.getAdapter().notifyDataSetChanged();
         }
 
         @Override
@@ -172,8 +171,9 @@ public final class BarcodeCaptureActivity extends AppCompatActivity implements
 
         StaggeredGridLayoutManager layoutManager = new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL);
         //LinearLayoutManager layoutManager = new LinearLayoutManager(this);
-        layoutManager.scrollToPosition(0);
         mRecyclerView.setLayoutManager(layoutManager);
+
+        mRecyclerView.setHasFixedSize(true);
 
         Snackbar.make(mGraphicOverlay, "Tap to capture. Pinch/Stretch to zoom",
                 Snackbar.LENGTH_LONG)
@@ -313,10 +313,6 @@ public final class BarcodeCaptureActivity extends AppCompatActivity implements
 
         Intent intent = new Intent(this, SignalsDataService.class);
         bindService(intent, mServiceConnection, Context.BIND_AUTO_CREATE);
-
-
-
-
     }
 
     @Override
