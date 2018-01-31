@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:card_view="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:layout_centerHorizontal="true"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="5dp"
+    android:layout_marginLeft="5dp"
+    android:layout_marginRight="5dp"
+
+    >
+
+    <android.support.v7.widget.CardView
+        xmlns:card_view="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/card_view_signal"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        card_view:contentPaddingTop="5dp"
+        card_view:contentPaddingBottom="5dp"
+        card_view:contentPadding="7dp"
+        card_view:cardCornerRadius="5dp"
+        card_view:cardElevation="0dp"
+        android:foregroundTintMode="multiply"
+        >
+        <LinearLayout
+            android:id="@+id/controls"
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <TextView
+                android:id="@+id/card_signal_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/cardview_default_elevation"
+                android:layout_margin="@dimen/cardview_default_elevation"
+                android:textSize="12sp"
+                android:textColor="@color/colorSignal"
+                tools:text="Температура"/>
+            <TextView
+                android:id="@+id/card_signal_data"
+                android:textAlignment="center"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                style="@style/TextAppearance.AppCompat.PayloadValue"
+                tools:text="50"/>
+        </LinearLayout>
+    </android.support.v7.widget.CardView>
+
+</LinearLayout>

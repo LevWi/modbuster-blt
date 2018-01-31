@@ -1,0 +1,2 @@
+configurations.maybeCreate("default")
+artifacts.add("default", file('jlibmodbus-1.2.8.4.jar'))

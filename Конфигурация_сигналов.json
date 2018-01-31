@@ -1,0 +1,284 @@
+{
+  "groups": [
+    {
+      "id": 1,
+      "name": "Wiren Board",
+      "signals": [
+        15,
+        16,
+        17,
+        18,
+        19,
+        20
+      ]
+    } ,
+    {
+      "id": 5,
+      "name": "DVT-03",
+      "signals": [
+        11,
+        12,
+        13
+      ]
+    } ,
+    {
+      "id": 6,
+      "name": "Corrigo",
+      "signals": [
+        14
+      ]
+    }
+  ],
+  "signals": {
+    "11": {
+      "idx": 11,
+      "options": {
+        "falseString": "false",
+        "highLevel": 1,
+        "lowLevel": 0,
+        "multiplier": 1,
+        "shift": 0,
+        "trueString": "true",
+        "type": "FLOAT",
+        "format": "%.2f\u2103"
+      },
+      "UIvisible": false,
+      "name": "Temperature",
+      "publish_receiver_id": 0,
+      "refresh_when_publish": false,
+      "route": "IN"
+    } ,
+    "12": {
+      "idx": 12,
+      "options": {
+        "falseString": "false",
+        "highLevel": 1,
+        "lowLevel": 0,
+        "multiplier": 1,
+        "shift": 0,
+        "trueString": "true",
+        "type": "FLOAT",
+        "format": "%.2f"
+      },
+      "UIvisible": false,
+      "name": "Humidity",
+      "publish_receiver_id": 0,
+      "refresh_when_publish": false,
+      "route": "IN"
+    },
+    "13": {
+      "options": {
+        "falseString": "false",
+        "highLevel": 1,
+        "lowLevel": 0,
+        "multiplier": 1,
+        "shift": 0,
+        "trueString": "true",
+        "type": "FLOAT",
+        "format": "%.2f"
+      },
+      "UIvisible": false,
+      
+      "name": "Dew point",
+      "publish_receiver_id": 0,
+      "refresh_when_publish": false,
+      "route": "IN"
+    } ,
+    "14": {
+      "options": {
+        "falseString": "false",
+        "highLevel": 1,
+        "lowLevel": 0,
+        "multiplier": 1,
+        "shift": 0,
+        "trueString": "true",
+        "type": "FLOAT",
+        "format": "%.2f\u2103"
+      },
+      "UIvisible": true,
+      
+      "name": "Temperature",
+      "publish_receiver_id": 0,
+      "refresh_when_publish": false,
+      "route": "IN"
+    } ,
+    "15": {
+      "options": {
+        "falseString": "false",
+        "highLevel": 1,
+        "lowLevel": 0,
+        "multiplier": 1,
+        "shift": 0,
+        "trueString": "true",
+        "type": "FLOAT",
+        "format": "%.2fV"
+      },
+      "UIvisible": false,
+      
+      "name": "Vin",
+      "publish_receiver_id": 0,
+      "refresh_when_publish": false,
+      "route": "IN"
+    } ,
+
+    "16": {
+      "options": {
+        "falseString": "0",
+        "highLevel": 1,
+        "lowLevel": 0,
+        "multiplier": 1,
+        "shift": 0,
+        "trueString": "1",
+        "type": "BOOL"
+      },
+      "UIvisible": false,
+      
+      "name": "Rele 1",
+      "publish_receiver_id": 0,
+      "refresh_when_publish": false,
+      "route": "IN_OUT"
+    } ,
+
+    "17": {
+      "options": {
+        "falseString": "0",
+        "highLevel": 1,
+        "lowLevel": 0,
+        "multiplier": 1,
+        "shift": 0,
+        "trueString": "1",
+        "type": "BOOL"
+      },
+      "UIvisible": false,
+      
+      "name": "Rele 2",
+      "publish_receiver_id": 0,
+      "refresh_when_publish": false,
+      "route": "IN_OUT"
+    } ,
+
+    "18": {
+      "options": {
+        "falseString": "0",
+        "highLevel": 1,
+        "lowLevel": 0,
+        "multiplier": 1,
+        "shift": 0,
+        "trueString": "1",
+        "type": "BOOL"
+      },
+      "UIvisible": false,
+      
+      "name": "Buzzer switch",
+      "publish_receiver_id": 0,
+      "refresh_when_publish": false,
+      "route": "IN_OUT"
+    } ,
+
+    "19": {
+      "options": {
+        "falseString": "false",
+        "highLevel": 1,
+        "lowLevel": 0,
+        "multiplier": 1,
+        "shift": 0,
+        "trueString": "true",
+        "type": "INT"
+      },
+      "UIvisible": false,
+      "name": "Frequency",
+      "publish_receiver_id": 0,
+      "refresh_when_publish": false,
+      "route": "IN_OUT"
+    } ,
+
+    "20": {
+      "options": {
+        "falseString": "false",
+        "highLevel": 1,
+        "lowLevel": 0,
+        "multiplier": 1,
+        "shift": 0,
+        "trueString": "true",
+        "type": "INT"
+      },
+      "UIvisible": false,
+      
+      "name": "Volume",
+      "publish_receiver_id": 0,
+      "refresh_when_publish": false,
+      "route": "IN_OUT"
+    }
+  },
+  "mqtt": [
+    {
+      "uri": "tcp://192.168.10.11:1883",
+      "connect_id": "ExampleAndroidClient",
+      "options": {
+        "keep_alive_interval": 60,
+        "clean_session": false,
+        "connection_timeout": 30,
+        "automatic_reconnect": true
+      },
+      "topics": [
+        {
+          "topic": "/devices/dvt03rs/controls/temp",
+          "receiver_id": 11,
+          "qos": 0
+        } ,
+        {
+          "topic": "/devices/dvt03rs/controls/humidity",
+          "receiver_id": 12,
+          "qos": 0
+        } ,
+        {
+          "topic": "/devices/dvt03rs/controls/dew_point",
+          "receiver_id": 13,
+          "qos": 0
+        } ,
+        {
+          "topic": "/devices/corrigo/controls/temp",
+          "receiver_id": 14,
+          "qos": 0
+        } ,
+        {
+          "topic": "/devices/power_status/controls/Vin",
+          "receiver_id": 15,
+          "qos": 0
+        }  ,
+        {
+          "topic": "/devices/wb-gpio/controls/Relay_1",
+          "publish_topic": "/devices/wb-gpio/controls/Relay_1/on",
+          "receiver_id": 16,
+          "qos": 0
+        } ,
+        {
+          "topic": "/devices/wb-gpio/controls/Relay_2",
+          "publish_topic": "/devices/wb-gpio/controls/Relay_2/on",
+          "receiver_id": 17,
+          "qos": 0
+        } ,
+        {
+          "topic": "/devices/buzzer/controls/enabled",
+          "publish_topic": "/devices/buzzer/controls/enabled/on",
+          "receiver_id": 18,
+          "qos": 0
+        } ,
+        {
+          "topic": "/devices/buzzer/controls/frequency",
+          "publish_topic": "/devices/buzzer/controls/frequency/on",
+          "receiver_id": 19,
+          "qos": 0
+        } ,
+        {
+          "topic": "/devices/buzzer/controls/volume",
+          "publish_topic": "/devices/buzzer/controls/volume/on",          
+          "receiver_id": 20,
+          "qos": 0
+        }         
+      ]
+    }
+  ]
+}
+
+
